@@ -1,0 +1,15 @@
+Package: maRsden
+Type: Package
+Title: Provides easy access to data collected from the Marsden Farm at Iowa State University
+Version: 0.1.0
+Author@R: person("Gina", "Nichols", email = "virginia.nichols@gmail.com",
+                  role = c("aut", "cre"))
+Maintainer: Gina Nichols <virginia.nichols@gmail.comt>
+Description: Currently houses all data collected by Gina, but will ultimately house all published data produced from the 
+    Marsden Farm Cropping Systems Experiment, managed by Dr. Matt Liebman (mliebman@iastate.edu)
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 3.1.0)
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 6.1.1

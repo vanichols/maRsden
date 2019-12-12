@@ -1,6 +1,7 @@
 #############################
 ##
 ## Dec 11 2019
+## updated Dec 12, using plot_id in all data
 ## Process Will's data
 ## Writes file to _tidy and put in package
 ##
@@ -147,9 +148,13 @@ d14 <- CN14 %>% left_join(m14) %>%
 
 
 # write it ----------------------------------------------------------------
+plotkey <- read_csv("data-raw/_tidy/plotkey.csv")
+
+dat <- rbind(d13, d14) %>%
+  left_join(plotkey) %>%
+  select(plot_id, doy, everything(), -year, -block, -rot_trt, -harv_crop, -plot)
 
 # to tidy folder (just for reference?)
-dat <- rbind(d13, d14)
 
 dat %>% write_csv("data-raw/_tidy/cornbio_wo.csv")
 

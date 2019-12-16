@@ -21,9 +21,12 @@ Progress
 
 The package currently includes the following data:
 
-1.  mrs\_plotkey (each year's plot treatments, 2012-2019)
-2.  mrs\_cornbio13\_wo and mrs\_cornbio14\_wo (WO corn biomass data from 2013-2014)
-3.  hmm
+-   Weather from [Iowa Mesonet Ames Coop Station](https://mesonet.agron.iastate.edu/)
+-   Historical weather (1987-2018)
+-   Data-weather years (1987-2018, will be updated once 2019 ends)
+-   mrs\_plotkey (each year's plot treatments, 2012-2019)
+-   mrs\_cornbio\_wo (WO corn biomass data from 2013-2014)
+-   mrs\_soilh2o\_wo (WO soil water data from 2013-2014)
 
 Example
 -------

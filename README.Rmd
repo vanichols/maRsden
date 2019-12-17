@@ -43,6 +43,7 @@ The package currently includes the following data:
 4. My data from 2018-2019
   + mrs_nutrients18 (VN soil nutrients at planting in 2018)
   + mrs_penetrom (VN penetrometer readings 2018-2019)
+  + mrs_rootdepth (VN max root depths 2018-2019)
 
 ## Example
 

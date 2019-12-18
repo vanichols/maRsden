@@ -38,12 +38,14 @@ The package currently includes the following data:
 2. General experiment data
   + mrs_plotkey (each year's plot treatments, 2012-2019)
 3. Will Osterholtz (WO) data
-  + mrs_cornbio_wo (WO corn biomass data from 2013-2014)
-  + mrs_soilh2o_wo (WO soil water data from 2013-2014)
+  + mrs_cornbio_wo (WO corn biomass data 2013-2014)
+  + mrs_soilh2o_wo (WO soil water data 2013-2014)
 4. My data from 2018-2019
   + mrs_nutrients18 (VN soil nutrients at planting in 2018)
   + mrs_penetrom (VN penetrometer readings 2018-2019)
   + mrs_rootdepth (VN max root depths 2018-2019)
+  + mrs_cornbio_vn (VN corn biomass 2018-2019)
+  + mrs_cornlai_vn (VN corn leaf area index 2018-2019)
 
 ## Example
 

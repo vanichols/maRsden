@@ -211,3 +211,8 @@ s16 <- read_excel("data-raw/_raw/ml/stand_counts/2016 std cnts - corn soy.xlsx",
   left_join(pk) %>%
   group_by(year, doy, plot_id, crop) %>%
   summarise(pl_m2 = mean(pl_m2, na.rm = T))
+
+
+# 2017 --------------------------------------------------------------------
+
+

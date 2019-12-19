@@ -10,10 +10,10 @@ The goal of maRsden is to provide easy access to all data collected at the Marsd
 Installation
 ------------
 
-You can install the development version of maRsden using devtools
+You can install the development version of maRsden using devtools once it is no longer private.
 
 ``` r
-#devtools::install_github("r-lib/usethis")
+#devtools::install_github("vanichols/maRsden")
 ```
 
 Progress
@@ -37,6 +37,7 @@ The package currently includes the following data:
 
 1.  My data from 2018-2019
 
+-   mrs\_residue18 (VN residue at planting 2018)
 -   mrs\_nutrients18 (VN soil nutrients at planting in 2018)
 -   mrs\_penetrom (VN penetrometer readings 2018-2019)
 -   mrs\_rootdepth (VN max root depths 2018-2019)

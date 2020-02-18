@@ -5,6 +5,7 @@
 ## Process Will's data
 ## Writes file to _tidy and put in package
 ##
+## last updated: feb 18 2020 (added dates)
 ##############################
 
 rm(list=ls())
@@ -22,7 +23,9 @@ y13 <- w13  %>%
          lubedate = mdy(date),
          year = year(lubedate),
          doy = yday(lubedate)) %>%
-  select(year, doy, everything(), -lubedate, -date)
+  select(-date) %>%
+  rename(date = lubedate) %>%
+  select(year, date, doy, everything())
 
 # Separate his cols by mass (4-8), whole plant (9-12), leaf (13-16)
 #  stalk (17-20), cob+tassle(21-24),  grain (25-28)
@@ -35,7 +38,7 @@ m13 <- y13 %>% select(1:9) %>%
          "stalk" = !!names(.[7]),
          "cobtass" = !!names(.[8]),
          "grain" = !!names(.[9])) %>%
-  gather(organ, mass_g, -year, -doy, -system, -plot)
+  gather(organ, mass_g, -(year:plot))
 
 
 # whole plant
@@ -80,7 +83,7 @@ g13 <- y13 %>% select(1:4, 26:29) %>%
 
 CN13 <- bind_rows(p13, l13, s13, ct13, g13)
 d13 <- CN13 %>% left_join(m13) %>%
-  select(year, doy, plot, organ, mass_g, everything(), -system)
+  select(year, date, doy, plot, organ, mass_g, everything())
 
 
 # 2014 --------------------------------------------------------------------
@@ -95,7 +98,17 @@ y14 <- w14  %>%
          lubedate = mdy(date),
          year = year(lubedate),
          doy = yday(lubedate)) %>%
-  select(year, doy, everything(), -lubedate, -date)
+  select(-date) %>%
+  rename(date = lubedate) %>%
+  select(year, date, doy, everything())
+
+# m14 <- y14 %>% select(1:9) %>%
+#   rename("plant" = !!names(.[5]),
+#          "leaf" = !!names(.[6]),
+#          "stalk" = !!names(.[7]),
+#          "cobtass" = !!names(.[8]),
+#          "grain" = !!names(.[9])) %>%
+#   gather(organ, mass_g, -year, -doy, -system, -plot)
 
 m14 <- y14 %>% select(1:9) %>%
   rename("plant" = !!names(.[5]),
@@ -103,7 +116,7 @@ m14 <- y14 %>% select(1:9) %>%
          "stalk" = !!names(.[7]),
          "cobtass" = !!names(.[8]),
          "grain" = !!names(.[9])) %>%
-  gather(organ, mass_g, -year, -doy, -system, -plot)
+  gather(organ, mass_g, -(year:plot))
 
 
 p14 <- y14 %>% select(1:4, 10:13) %>%
@@ -143,7 +156,7 @@ g14 <- y14 %>% select(1:4, 26:29) %>%
 
 CN14 <- bind_rows(p14, l14, s14, ct14, g14)
 d14 <- CN14 %>% left_join(m14) %>%
-  select(year, doy, plot, organ, mass_g, everything(), -system)
+  select(year, date, doy, plot, organ, mass_g, everything())
 
 
 
@@ -152,7 +165,7 @@ plotkey <- read_csv("data-raw/_tidy/plotkey.csv")
 
 dat <- rbind(d13, d14) %>%
   left_join(plotkey) %>%
-  select(plot_id, doy, everything(), -year, -block, -rot_trt, -harv_crop, -plot)
+  select(plot_id, date, doy, everything(), -year, -block, -rot_trt, -harv_crop, -plot)
 
 # to tidy folder (just for reference?)
 

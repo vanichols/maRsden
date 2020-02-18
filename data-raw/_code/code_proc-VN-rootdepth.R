@@ -5,6 +5,7 @@
 ##
 ## NOTES:
 ##
+## last updated: feb 18 2020 (added dates)
 #########################
 
 
@@ -25,6 +26,7 @@ rd18raw <- read_excel("data-raw/_raw/vn/2018/rd_rootdepth18.xlsx", skip = 5)
 
 rd18 <-
   rd18raw %>%
+  mutate(date = as_date(date)) %>%
   group_by(date, plot, trt, stage, block) %>%
   summarise(rootdepth_in = mean(rootdepth_in, na.rm = T)) %>%
   mutate(year = year(date),
@@ -33,7 +35,7 @@ rd18 <-
   left_join(pk) %>%
   ungroup() %>%
   mutate(rootdepth_cm = rootdepth_in * 2.54) %>%
-  select(year, doy, plot_id, stage, rootdepth_cm)
+  select(year, date, doy, plot_id, stage, rootdepth_cm)
 
 
 
@@ -66,10 +68,11 @@ rd19raw <-
 
 
 rd19 <- rd19raw %>%
-  mutate(year = year(date),
+  mutate(date = as_date(date),
+         year = year(date),
          doy = yday(date)) %>%
   left_join(pk) %>%
-  select(year, doy, plot_id, mrd_cm) %>%
+  select(year, date, doy, plot_id, mrd_cm) %>%
   rename("rootdepth_cm" = mrd_cm)
 
 # have to get phenology to merge with it. hmm
@@ -83,21 +86,22 @@ phenraw <-
   select(data) %>%
   unnest(cols = c(data)) %>%
   fill(date, plot) %>%
-  mutate(year = year(date),
+  mutate(date = as_date(date),
+         year = year(date),
          doy = yday(date)) %>%
-  select(year, doy, plot, rep, stage) %>%
+  select(year, date, doy, plot, rep, stage) %>%
   # replace the one VT with R1
   mutate(stage = ifelse(stage == "VT", "R1", stage)) %>%
   mutate(stagenum = as.numeric(str_sub(stage, 2)),
            stagelet = str_sub(stage, 1, 1)) %>%
   # find average stage for a plot
-  group_by(year, doy, plot, stagelet) %>%
+  group_by(year, date, doy, plot, stagelet) %>%
   summarise(stage = mean(stagenum, na.rm=T),
             stage2 = round(stage, 0)) %>%
   ungroup() %>%
   mutate(stage = paste0(stagelet, stage2)) %>%
   left_join(pk) %>%
-    select(year, doy, plot_id, stage) %>%
+    select(year, date, doy, plot_id, stage) %>%
   # wyatt forgot to do 2019_21 on day 213, just make it R1
   mutate(stage = ifelse( (plot_id == "2019_21" & doy == 213), "R1", stage)) %>%
   # make dummy doy2 to merge w/roots
@@ -108,6 +112,8 @@ phenraw <-
       doy == 232 ~ 231,
       TRUE ~ doy)) %>%
   select(-doy)
+
+phenraw
 
 rd19phen <- rd19 %>%
   mutate(doy2 = doy) %>%
@@ -126,9 +132,9 @@ rd19dat <-
          doy = yday(date),
          stage = "planting",
          rootdepth_cm = 0) %>%
-  select(-date) %>%
+  #select(-date) %>%
   bind_rows(rd19phen) %>%
-  arrange(year, doy, plot_id)
+  arrange(year, date, doy, plot_id)
 
 # combine 2018 and 2019 data ----------------------------------------------
 

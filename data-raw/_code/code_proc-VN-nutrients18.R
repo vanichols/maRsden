@@ -2,8 +2,9 @@
 ## Created Dec 16 2019
 ## Author Gina
 ## Purpose: Process Agsource data on soil saamples
-## NOTES: 
+## NOTES:
 ##
+## Last updated: feb 18 2020 (added date)
 #########################
 
 rm(list=ls())
@@ -19,8 +20,8 @@ agraw <- read_excel("data-raw/_raw/vn/2018/rd_mars-soil_nutrients.xlsx", skip = 
 
 # process -----------------------------------------------------------------
 
-mrs_nutrients18 <- 
-  agraw %>% 
+mrs_nutrients18 <-
+  agraw %>%
   mutate(depth = str_sub(samp_id, -1),
          block = tolower(str_sub(samp_id, 1, 2)),
          plot = as.numeric(str_sub(samp_id, 4, 5)),
@@ -30,10 +31,10 @@ mrs_nutrients18 <-
          year = year(date),
          doy = yday(date)) %>%
   gather(PH:SALTS, key = 'msmt', value = 'value') %>%
-  mutate(msmt = tolower(msmt)) %>% 
+  mutate(msmt = tolower(msmt)) %>%
   left_join(pk) %>%
-  select(year, doy, plot_id, depth_cm, msmt, value) %>% 
-  arrange(year, doy, plot_id, depth_cm, msmt)
+  select(year, date, doy, plot_id, depth_cm, msmt, value) %>%
+  arrange(year, date, doy, plot_id, depth_cm, msmt)
 
 
 

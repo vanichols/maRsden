@@ -5,6 +5,7 @@
 ##
 ## NOTES:
 ##
+## last updated: feb 18 2020 (added dates)
 #########################
 
 
@@ -48,7 +49,7 @@ sm <-
   mutate(date = ymd("2018-05-10"),
          year = year(date),
          doy = yday(date)) %>%
-  select(-date) %>%
+  #select(-date) %>%
   #--soil depth is just to note if I didn't go deep
   filter(!is.na(soildepth_in)) %>%
   mutate_at(c("wetsoil_g", "wetbag_g", "drysoil_g", "drybag_g"), as.numeric) %>%
@@ -62,7 +63,8 @@ sm <-
          depth_cm = "0-45") %>%
   #--merge w/plot key
   left_join(pk) %>%
-  select(year, doy, plot_id, soilpair_YN, depth_cm, soilh2o_g.g, samp_ID) %>%
+  select(year, date, doy, plot_id,
+         soilpair_YN, depth_cm, soilh2o_g.g, samp_ID) %>%
   filter(!is.na(soilh2o_g.g))
 
 
@@ -93,7 +95,7 @@ may <-
   mutate(block = tolower(block),
          harv_crop = trt) %>%
   left_join(pk) %>%
-  select(year, doy, plot_id, soilpair_YN, samp_ID, depth_in, resis_psi) %>%
+  select(year, date, doy, plot_id, soilpair_YN, samp_ID, depth_in, resis_psi) %>%
   # Merge soil moisture + olk penetrometer
   # NOTE: I think the depths are off. What it thinks is 1, is actually 0.  But whatever.
   left_join(sm) %>%
@@ -133,13 +135,13 @@ july <-
   mutate(block = tolower(block),
          harv_crop = trt) %>%
   left_join(pk) %>%
-  select(year, doy, plot_id, soilpair_YN, soilh2o_g.g, samp_ID, depth_cm, resis_kpa) %>%
+  select(year, date, doy, plot_id, soilpair_YN, soilh2o_g.g, samp_ID, depth_cm, resis_kpa) %>%
   #--for some reason values below 40 are nonsense, filter them out
   filter(depth_cm <= 40)
 
 
 july %>%
-  group_by(doy, plot_id, depth_cm) %>%
+  group_by(date, doy, plot_id, depth_cm) %>%
   summarise(resis_kpa = mean(resis_kpa)) %>%
   ggplot(aes(depth_cm, resis_kpa, group = doy)) +
   geom_line(size = 2, aes(color = doy)) +
@@ -152,7 +154,7 @@ july %>%
 # Combine may and july 2018 data ------------------------------------------
 
 pen18 <- bind_rows(may, july) %>%
-  select(year, doy, plot_id, soilh2o_g.g, depth_cm, resis_kpa)
+  select(year, date, doy, plot_id, soilh2o_g.g, depth_cm, resis_kpa)
 
 
 # look at it --------------------------------------------------------------
@@ -202,7 +204,7 @@ pen19 <-
   #--weird 0 values and low values at >40 cm depth
   filter(resis_kpa >0) %>%
   filter(!(depth_cm > 40 & resis_kpa <500)) %>%
-  select(year, doy, plot_id, soilh2o_g.g, depth_cm, resis_kpa)
+  select(year, date, doy, plot_id, soilh2o_g.g, depth_cm, resis_kpa)
 
 
 pen19 %>%
@@ -223,10 +225,10 @@ pen19 %>%
 
 mrs_penet_vn <-
   bind_rows(pen18, pen19) %>%
-  group_by(year, doy, plot_id, depth_cm) %>%
+  group_by(year, date, doy, plot_id, depth_cm) %>%
   summarise(soilh2o_g.g = mean(soilh2o_g.g, na.rm = T),
             resis_kpa = mean(resis_kpa, na.rm = T)) %>%
-  arrange(year, doy, plot_id, depth_cm)
+  arrange(year, date, doy, plot_id, depth_cm)
 
 mrs_penet_vn %>% write_csv("data-raw/_tidy/penet_vn.csv")
 usethis::use_data(mrs_penet_vn, overwrite = T)

@@ -4,6 +4,7 @@
 ## Process Iowa Mesonet files
 ## Writes file to _tidy and put in package
 ##
+## last updated: feb 18 2020 (added dates)
 ##############################
 
 rm(list=ls())
@@ -27,14 +28,17 @@ wea <-
          lubedate = mdy(date),
          year = year(lubedate),
          doy = yday(lubedate)) %>%
-  select(year, doy, everything(), -lubedate, -day, -date)
+  select(-date) %>%
+  rename(date = lubedate) %>%
+  select(year, date, doy, everything(), -day)
 
 wea18 <-
   wea18r %>%
   mutate(lubedate = ymd(day),
          year = year(lubedate),
-         doy = yday(lubedate)) %>%
-  select(year, doy, everything(), -lubedate, -day)
+         doy = yday(lubedate),
+         date = as_date(lubedate)) %>%
+  select(year, date, doy, everything(), -lubedate, -day)
 
 # bind weather years tog here
 dat <-
@@ -44,7 +48,7 @@ dat <-
          "loT_c" = lowc,
          "precip_mm" = precipmm,
          "narr_srad_mjday" = narr_srad) %>%
-  select(station, station_name, year, doy, everything())
+  select(station, station_name, year, date, doy, everything())
 
 # viz check ---------------------------------------------------------------------
 

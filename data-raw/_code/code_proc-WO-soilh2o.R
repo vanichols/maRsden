@@ -4,6 +4,7 @@
 ## Process Will's data
 ## Writes file to _tidy and put in package
 ##
+## last updated: feb 18 2020 (added date)
 ##############################
 
 rm(list=ls())
@@ -28,7 +29,9 @@ sw <-
          lubedate = mdy(date),
          year = year(lubedate),
          doy = yday(lubedate)) %>%
-  select(year, doy, everything(), -lubedate, -date) %>%
+  select(-date) %>%
+  rename(date = lubedate) %>%
+  select(year, date, doy, everything()) %>%
   #--gather depths
   gather(`0-10cm_soilH2O_g.g`:`0-30cm_soilH2O_g.g`, key = depth, value = soilh2o_g.g) %>%
   mutate(depth_cm = str_remove(depth, "cm_soilH2O_g.g")) %>%
@@ -36,7 +39,7 @@ sw <-
   mutate(block = paste0("b", block)) %>%
   left_join(plotkey) %>%
   #--clean up
-  select(year, doy, plot_id, depth_cm, soilh2o_g.g)
+  select(year, date, doy, plot_id, depth_cm, soilh2o_g.g)
 
 
 

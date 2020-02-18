@@ -37,7 +37,7 @@ pl %>%
   mutate(block = paste0("b", block),
          rot_trt = paste0(system, "y"),
          harv_crop = paste0(crop, system)) %>%
-  left_join(plotkey) %>%
+  left_join(plotkey)
 
 
 # first, get year into pl

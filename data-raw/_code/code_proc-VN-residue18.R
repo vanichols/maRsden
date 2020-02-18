@@ -4,6 +4,7 @@
 ## Purpose: Process 2018 residue samples
 ## NOTES:
 ##
+## last updated: feb 18 2020 (added date)
 #########################
 
 rm(list=ls())
@@ -21,13 +22,14 @@ resraw <- read_excel("data-raw/_raw/vn/2018/rd_mars-residue.xlsx", skip = 5, na 
 
 mrs_residue18 <-
   resraw %>%
-  mutate(year = year(date),
+  mutate(date = as_date(date),
+         year = year(date),
          doy = yday(date),
          residue_g = residueandbag_g - drybag_g,
          block = tolower(block),
          harv_crop = trt) %>%
   left_join(pk) %>%
-  group_by(year, doy, plot_id) %>%
+  group_by(year, date, doy, plot_id) %>%
   summarise(residue_g = mean(residue_g, na.rm = T))
 
 

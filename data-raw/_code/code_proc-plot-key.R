@@ -25,7 +25,8 @@ library(readxl)
 
 # 2012-2019 ---------------------------------------------------------------
 
-pk19 <- read_excel("data-raw/_raw/rd_year-plot-trt-key2.xlsx", sheet = "2012-2019") %>%
+pk19 <- read_excel("data-raw/_raw/rd_year-plot-trt-key2.xlsx",
+                   sheet = "2012-2019") %>%
   mutate(block = str_sub(plot, 1, 1),
          rot_trt = str_sub(rot_trt, 1,2)) %>%
   mutate(block = paste0("b", block)) %>%

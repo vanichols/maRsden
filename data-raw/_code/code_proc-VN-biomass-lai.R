@@ -66,7 +66,7 @@ bm18 <-
   select(-contains("ds")) %>%
   gather(leaf:plant, key = organ, value = mass_g) %>%
   mutate(mass_gpl = mass_g/nu_pl) %>%
-  select(year, date, doy, plot_id, organ, mass_gpl)
+  select(year, date, doy, plot_id, organ, mass_g, mass_gpl)
 
 lai18 <-
   bm18raw %>%
@@ -135,14 +135,15 @@ bm19 <-
          plot_id,
          plant, leaf, stalkcobtass, grain, grain500) %>%
   gather(plant:grain500, key = organ, value = mass_g) %>%
-  mutate(mass_gpl = mass_g/8) %>% #--always 8 plants in 2019
-  select(-mass_g)
+  mutate(mass_gpl = mass_g/8)  #--always 8 plants in 2019
+
 
 # make lai and biomass datasets -------------------------------------------
 
 mrs_cornbio_vn <-
   bind_rows(bm18, bm19) %>%
-  arrange(year, date, doy, plot_id, organ)
+  arrange(year, date, doy, plot_id, organ) %>%
+  mutate_if(is.numeric, replace_na, 0)
 
 mrs_cornbio_vn %>%  write_csv("data-raw/_tidy/cornbio_vn.csv")
 usethis::use_data(mrs_cornbio_vn, overwrite = T)

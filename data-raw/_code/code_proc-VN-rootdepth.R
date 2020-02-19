@@ -6,6 +6,7 @@
 ## NOTES:
 ##
 ## last updated: feb 18 2020 (added dates)
+##              2019 planting has too many plots
 #########################
 
 
@@ -67,6 +68,7 @@ rd19raw <-
   rename("date" = "date3")
 
 
+#--this doesn't have a 'planting' data point
 rd19 <- rd19raw %>%
   mutate(date = as_date(date),
          year = year(date),
@@ -124,7 +126,7 @@ rd19phen <- rd19 %>%
 # planting happened June 3 2019. Add that dummy spot I guess
 rd19dat <-
   pk %>%
-  filter(year == 2019) %>%
+  filter(year == 2019, rot_trt %in% c("C4", "C2")) %>%
   select(plot_id) %>%
   unique() %>%
   mutate(date = ymd("2019-06-03"),

@@ -1,6 +1,7 @@
 #############################
 # created dec 11 2019
 # updated dec 12 2019 (changed layout, added years 2008-2011 that need filled in)
+#         march 13 2020 (updating pkg structure)
 # read in 'raw' plot trt key
 # that raw file will be updated each year
 # write a tidy file that will be used as data in the package
@@ -25,7 +26,7 @@ library(readxl)
 
 # 2012-2019 ---------------------------------------------------------------
 
-pk19 <- read_excel("data-raw/_raw/rd_year-plot-trt-key2.xlsx",
+pk19 <- read_excel("data-raw/plotkey/rd_year-plot-trt-key2.xlsx",
                    sheet = "2012-2019") %>%
   mutate(block = str_sub(plot, 1, 1),
          rot_trt = str_sub(rot_trt, 1,2)) %>%
@@ -38,9 +39,10 @@ pk19 <- read_excel("data-raw/_raw/rd_year-plot-trt-key2.xlsx",
 
 # need to do
 
+plotkey <- pk19
 
 plotkey %>%
-  write_csv("data-raw/_tidy/plotkey.csv")
+  write_csv("data-raw/plotkey/plotkey.csv")
 
 mrs_plotkey <- plotkey
 usethis::use_data(mrs_plotkey, overwrite = T)

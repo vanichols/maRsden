@@ -1,11 +1,13 @@
 #########################
-## Created: Dec 16 2019
-## Author: Gina
-## Purpose: Process penetrometer data from 2018 and 2019
-##
-## NOTES:
-##
-## last updated: feb 18 2020 (added dates)
+# Created: Dec 16 2019
+#
+# updated: feb 18 2020 (added date)
+#          march 13 2020 (updated pkg structure)
+#
+# Purpose: Process penetrometer data from 2018 and 2019
+#
+# NOTES:
+#
 #########################
 
 
@@ -16,8 +18,7 @@ library(lubridate)
 library(readxl) #--used to read Excel files
 library(janitor) #--used to clean data
 
-
-pk <- read_csv("data-raw/_tidy/plotkey.csv")
+pk <- read_csv("data-raw/plotkey/plotkey.csv")
 
 
 # 2018 --------------------------------------------------------------------
@@ -27,17 +28,17 @@ pk <- read_csv("data-raw/_tidy/plotkey.csv")
 # or is it may 9? that's the time stamp....
 
 #--soil moisture measurements
-smraw <- read_excel("data-raw/_raw/vn/2018/rd_penetrometer-soilmois-20180509.xlsx", skip = 5) %>%
+smraw <- read_excel("data-raw/penetrom/rd_penetrometer-soilmois-20180509.xlsx", skip = 5) %>%
   mutate(samp_ID = paste(block, trt, N, sep = "-"))
 
 #--'raw' file from olk, I changed the first two columns apparently, has no date
 # taken in may
-mayraw <- read_excel("data-raw/_raw/vn/2018/rd_penetrometer-OLK-20180509.xlsx",
+mayraw <- read_excel("data-raw/penetrom/rd_penetrometer-OLK-20180509.xlsx",
                   skip = 5)
 
 
 #--doesn't include date, but file is named 20180716, taken in july assumed
-julyraw <- read_excel("data-raw/_raw/vn/2018/rd_penetrometer-Gina-20180716.xlsx", skip = 5)
+julyraw <- read_excel("data-raw/penetrom/rd_penetrometer-Gina-20180716.xlsx", skip = 5)
 
 
 # wrangle may data-----------------------------------------------------------------
@@ -175,7 +176,7 @@ pen18 %>%
 
 # Data from June 11 2019 ------------------------------------------------
 
-jun19raw <- read_excel("data-raw/_raw/vn/2019/rd_20190611-penet.xlsx", skip = 4)
+jun19raw <- read_excel("data-raw/penetrom/rd_20190611-penet.xlsx", skip = 4)
 
 pen19 <-
   jun19raw %>%
@@ -223,12 +224,12 @@ pen19 %>%
 
 # average over sub-reps, so we only have one value for each plot
 
-mrs_penet_vn <-
+mrs_penetrom <-
   bind_rows(pen18, pen19) %>%
   group_by(year, date, doy, plot_id, depth_cm) %>%
   summarise(soilh2o_g.g = mean(soilh2o_g.g, na.rm = T),
             resis_kpa = mean(resis_kpa, na.rm = T)) %>%
   arrange(year, date, doy, plot_id, depth_cm)
 
-mrs_penet_vn %>% write_csv("data-raw/_tidy/penet_vn.csv")
-usethis::use_data(mrs_penet_vn, overwrite = T)
+mrs_penetrom %>% write_csv("data-raw/penetrom/penetrom.csv")
+usethis::use_data(mrs_penetrom, overwrite = T)

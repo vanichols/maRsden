@@ -1,10 +1,12 @@
 #########################
-## Created Dec 19 2019
-## Author Gina
-## Purpose: Process 2018 residue samples
-## NOTES:
-##
-## last updated: feb 18 2020 (added date)
+# created: Dec 19 2019
+#
+# updated: march 13 2020 (new pkg structure)
+#
+# purpose: Process 2018 residue samples
+#
+# NOTES:
+#
 #########################
 
 rm(list=ls())
@@ -12,15 +14,15 @@ library(tidyverse)
 library(lubridate)
 library(readxl) # used to read Excel files
 
-pk <- read_csv("data-raw/_tidy/plotkey.csv")
+pk <- read_csv("data-raw/plotkey/plotkey.csv")
 
-resraw <- read_excel("data-raw/_raw/vn/2018/rd_mars-residue.xlsx", skip = 5, na = "NA") %>%
+resraw <- read_excel("data-raw/residue/rd_mars-residue.xlsx", skip = 5, na = "NA") %>%
   select(-notes)
 
 
 # process -----------------------------------------------------------------
 
-mrs_residue18 <-
+mrs_residue <-
   resraw %>%
   mutate(date = as_date(date),
          year = year(date),
@@ -36,5 +38,5 @@ mrs_residue18 <-
 
 # save it -----------------------------------------------------------------
 
-mrs_residue18 %>% write_csv("data-raw/_tidy/residue18_vn.csv")
-usethis::use_data(mrs_residue18, overwrite = T)
+mrs_residue %>% write_csv("data-raw/residue/residue.csv")
+usethis::use_data(mrs_residue, overwrite = T)

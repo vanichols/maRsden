@@ -28,9 +28,7 @@ library(fuzzyjoin) #--to do fuzzy joining of dates
 
 pk <- read_csv("data-raw/_tidy/plotkey.csv")
 
-mydir <- "_theme-2019data/_data/raw/"
-mydir <- "data-raw/_raw/vn/2019/"
-
+mydir <- "data-raw/cornbio/"
 
 
 
@@ -38,7 +36,7 @@ mydir <- "data-raw/_raw/vn/2019/"
 
 # this is a fucking mess.
 
-bm18raw <- read_excel("data-raw/_raw/vn/2018/rd_mars-destructive_sampling.xlsx",
+bm18raw <- read_excel("data-raw/cornbio/rd_mars-destructive_sampling.xlsx",
                       skip = 5,
                       na = "NA") %>%
   mutate(date = as_date(date),
@@ -68,34 +66,8 @@ bm18 <-
   mutate(mass_gpl = mass_g/nu_pl) %>%
   select(year, date, doy, plot_id, organ, mass_g, mass_gpl)
 
-lai18 <-
-  bm18raw %>%
-  mutate(lai_cm2pl = ds_gLAI_cm2 / ds_noplsubsam) %>%
-  select(year, date, doy, plot_id, lai_cm2pl)
 
-
-# 2019 LAI and biomass ----------------------------------------------------
-
-#--LAI
-
-lai19raw <-
-  tibble(files = list.files(mydir)) %>%
-  mutate(path = paste0(mydir, files)) %>%
-  filter(grepl('lai', files)) %>%
-  mutate(data = path %>% map(read_excel, skip = 5)) %>%
-  select(data) %>%
-  unnest(cols = c(data)) %>%
-  fill(date)
-
-lai19 <-
-  lai19raw %>%
-  mutate(date = as_date(date),
-         year = year(date),
-         doy = yday(date)) %>%
-  left_join(pk) %>%
-  mutate(lai_cm2pl = LAI_cm2 / subsampl_no) %>%
-  select(year, date, doy, plot_id, lai_cm2pl) %>%
-  arrange(year, date, doy, plot_id)
+# 2019 biomass ----------------------------------------------------
 
 #--biomass
 
@@ -103,6 +75,7 @@ bm19raw <-
   tibble(files = list.files(mydir)) %>%
   mutate(path = paste0(mydir, files)) %>%
   filter(grepl('biomass', files)) %>%
+  filter(grepl(".xlsx", files)) %>%
   mutate(data = path %>% map(read_excel, skip = 5)) %>%
   select(data) %>%
   unnest(cols = c(data)) %>%
@@ -140,36 +113,11 @@ bm19 <-
 
 # make lai and biomass datasets -------------------------------------------
 
-mrs_cornbio_vn <-
+mrs_cornbio <-
   bind_rows(bm18, bm19) %>%
   arrange(year, date, doy, plot_id, organ) %>%
   mutate_if(is.numeric, replace_na, 0)
 
-mrs_cornbio_vn %>%  write_csv("data-raw/_tidy/cornbio_vn.csv")
-usethis::use_data(mrs_cornbio_vn, overwrite = T)
+mrs_cornbio %>%  write_csv("data-raw/cornbio/cornbio.csv")
 
-mrs_cornlai_vn <-
-  bind_rows(lai18, lai19) %>%
-  arrange(year, doy, plot_id)
-
-mrs_cornlai_vn %>%  write_csv("data-raw/_tidy/cornlai_vn.csv")
-
-usethis::use_data(mrs_cornlai_vn, overwrite = T)
-
-
-# # merge 'em ---------------------------------------------------------------
-#
-# #--growth analysis = ga
-#
-# garaw <-
-#   lairaw %>%
-#   left_join(bmraw) %>%
-#   mutate(tot_g_m2 = tot_g,
-#          tot_g_pl  = tot_g / totpl_no,
-#          LAI_m2_pl = LAI_cm2 / subsampl_no / (100^2),
-#          LAI_m2_m2 = LAI_cm2 / (100^2),
-#          date = as.Date(date)) %>%
-#    select(date, plot, tot_g_m2, tot_g_pl, LAI_m2_pl, LAI_m2_m2)
-#
-# garaw %>%
-#   write_csv("_theme-2019data/_data/tidy/td_lai-bm.csv")
+usethis::use_data(mrs_cornbio, overwrite = T)

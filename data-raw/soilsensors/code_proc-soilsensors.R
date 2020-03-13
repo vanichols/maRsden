@@ -24,11 +24,27 @@ pk <- read_csv("data-raw/plotkey/plotkey.csv") %>%
          harv_crop %in% c("C2", "C4"))
 
 
-ssraw <- readRDS("data-raw/soilsensors/tidyQC-soil-marsden.rds") %>%
+
+# raw data (from facts datahub) -------------------------------------------
+
+ssraw19 <- readRDS("data-raw/soilsensors/tidyQC-soil-marsden.rds") %>%
+  filter(year == 2019) %>%
   mutate(date = as_date(date),
          year = year(date),
          doy = yday(date),
          plot = as.numeric(plot))
+
+ssraw18 <- readRDS("data-raw/soilsensors/2020-03-13mars-intervention.rds") %>%
+  filter(year == 2018) %>%
+  mutate(date = as_date(date),
+         year = year(date),
+         doy = yday(date),
+         plot = as.numeric(plot))
+
+ssraw <-
+  ssraw18 %>%
+  bind_rows(ssraw19)
+
 
 ss <- ssraw %>%
   left_join(pk) %>%
@@ -36,7 +52,7 @@ ss <- ssraw %>%
          sensor_type, sensor_name, sensor_depth_cm, sensor_unit, value)
 
 
-#--something funny is happening in 2018....
+#--these probably need scaled somehow....
 ss %>%
   filter(sensor_unit == "soilVWC") %>%
   left_join(pk) %>%

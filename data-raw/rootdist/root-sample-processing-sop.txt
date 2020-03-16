@@ -1,0 +1,13 @@
+# Root samples soil sub-sampling process
+
+1. Take soil sub-samples
+The fresh weight of the bag is recorded, ~200 grams of fresh soil weight is removed, roots are removed from the soil and put back in the bag. 
+Soil and subsamples are stored in cooler of 1st floor Archontoulis lab.
+Red tub is 'processed' soils. Alfalfa (3 samplings), oats, and corn are in there. 
+# NOTE: ignore the sampid column on the freshwt data sheets. Use the log-samp-processing sample ids for all labels and future reference. 
+
+# Root washing process
+1. Use a capful of sodium hexmetabiphosphate in the big tub.
+2. Put enough in a plastic tupperware to cover the soil. Break up chunks, let it sit while you prepare other ones. 
+3. I can't remember......argh
+Basically wash the roots through the mesh thing ~15 minutes, get them into a jar. You can sort them later, but don't wait more than 1 week. 

@@ -160,12 +160,25 @@ pen18 <- bind_rows(may, july) %>%
 
 # look at it --------------------------------------------------------------
 
-pen18 %>%
-  group_by(doy, plot_id, depth_cm) %>%
-  summarise(resis_kpa = mean(resis_kpa)) %>%
+dat %>%
+  separate(site_yr, into = c("site", "year"), remove = F) %>%
+  mutate(site_ID = group_indices(., site))
 
-  ggplot(aes(depth_cm, resis_kpa, group = doy)) +
-  geom_line(size = 2, aes(color = doy)) +
+
+# argh I don't include rep...
+pen18 %>%
+  mutate(rep = ifelse(depth_cm == 0, 1, 0)) %>%
+  ungroup() %>%
+  mutate(rep_id = cumsum(rep)) %>% #--I'm so clever :|
+  filter(doy >160) %>%
+  filter(plot_id %in% c("2018_13", "2018_18")) %>%
+  #group_by(doy, plot_id, depth_cm) %>%
+  #summarise(resis_kpa = mean(resis_kpa)) %>%
+  mutate(group_id = group_indices(., plot_id)) %>%
+  ggplot(aes(depth_cm, resis_kpa, group = rep_id)) +
+  geom_point(size = 2) +
+  geom_line() +
+  stat_summary(fun.y = mean, geom = "point", color = "red") +
   coord_flip() +
   scale_x_reverse()  +
   facet_grid(.~plot_id)

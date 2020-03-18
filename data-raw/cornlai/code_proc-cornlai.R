@@ -24,7 +24,6 @@ library(tidyverse)
 library(lubridate)
 library(readxl) #--used to read Excel files
 library(janitor) #--used to clean data
-library(fuzzyjoin) #--to do fuzzy joining of dates
 
 #--this is the plotkey data available in the package
 pk <- read_csv("data-raw/plotkey/plotkey.csv")

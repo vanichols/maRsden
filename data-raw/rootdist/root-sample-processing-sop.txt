@@ -5,6 +5,8 @@ The fresh weight of the bag is recorded, ~200 grams of fresh soil weight is remo
 Soil and subsamples are stored in cooler of 1st floor Archontoulis lab.
 Red tub is 'processed' soils. Alfalfa (3 samplings), oats, and corn are in there. 
 # NOTE: ignore the sampid column on the freshwt data sheets. Use the log-samp-processing sample ids for all labels and future reference. 
+# NOTE: cooler broke and samples were moved - I think ones that had already been processed got mixed up...
+noticed 4/29/2020 when Mickala gave me sheet w/new sub-samples listed
 
 # Root washing process
 1. Use a capful of sodium hexmetabiphosphate in the big tub.

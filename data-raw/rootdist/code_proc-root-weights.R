@@ -56,6 +56,21 @@ mrs_rootwgts <-
   arrange(samp_id_short) %>%
   left_join(samp_ids, by = c("samp_id_short"))
 
+#--checking values
+library(ggplot2)
+library(tidyverse)
+library(maRsden)
+
+mrs_rootwgts %>%
+  left_join(mrs_plotkey) %>%
+  filter(grepl("C", harv_crop)) %>%
+  mutate(depth_cm = factor(depth_cm, levels = c("0-15", "15-30", "30-60", "60-90", "90-120"))) %>%
+  ggplot(aes(x = reorder(depth_cm, desc(depth_cm)), weight_mg)) +
+  geom_jitter(aes(color = rot_trt)) +
+  coord_flip()
+
+#--where is this 90-120 value coming from?
+
 
 mrs_rootwgts %>% write_csv("data-raw/rootdist/rootwgts.csv")
 usethis::use_data(mrs_rootwgts, overwrite = T)

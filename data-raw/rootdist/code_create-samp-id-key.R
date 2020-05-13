@@ -48,5 +48,4 @@ mrs_rootdist_sampids <-
   samp_ids %>%
   arrange(plot_id, samp_date)
 
-mrs_rootdist_sampids %>% write_csv("data-raw/rootdist/rootdist_sampids.csv")
-usethis::use_data(mrs_rootdist_sampids, overwrite = T)
+mrs_rootdist_sampids %>% write_csv("data-raw/rootdist/tmp_rootdist_sampids.csv")

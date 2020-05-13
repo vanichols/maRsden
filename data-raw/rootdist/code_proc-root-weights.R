@@ -25,7 +25,7 @@ library(janitor) #--used to clean data
 pk <- read_csv("data-raw/plotkey/plotkey.csv") %>%
   filter(year == 2019)
 
-samp_ids <- read_csv("data-raw/rootdist/rootdist_sampids.csv")
+samp_ids <- read_csv("data-raw/rootdist/tmp_rootdist_sampids.csv")
 
 
 

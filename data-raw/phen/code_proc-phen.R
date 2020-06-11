@@ -20,13 +20,12 @@ library(janitor) #--used to clean data
 library(fuzzyjoin) #--to do fuzzy joining of dates
 
 #--this is the plotkey data available in the package
-pk <- read_csv("data-raw/plotkey/plotkey.csv")
+data("mrs_plotkey")
 
 mydir <- "data-raw/phen/"
 
 
 # 2018 data ---------------------------------------------------------------
-
 
 praw18 <- read_excel("data-raw/phen/rd_mars-phenology.xlsx",
                       skip = 5)
@@ -40,7 +39,7 @@ p18 <-
          harv_crop = trt,
          block = paste0("b", rep),
          pl_id = paste0("p", plot, "-", phen_plno)) %>%
-  left_join(pk) %>%
+  left_join(mrs_plotkey) %>%
   #--name things nicer
   rename(pls_nu = phen_nopl,
          plht_cm = phen_plht_cm,
@@ -72,7 +71,7 @@ p19 <-
   mutate(date = as_date(date),
          year = year(date),
          doy = yday(date)) %>%
-  left_join(pk) %>%
+  left_join(mrs_plotkey) %>%
   #--deal w/ plant heights
   mutate(plht_cm = ifelse(is.na(plht_cm), plht_in * 2.54, plht_cm),
          pl_id = paste0("p", plot, "-", rep),
@@ -86,14 +85,51 @@ p19 <-
          devleaves_nu, grleaves_nu, funleaves_nu)
 
 
+# 2020 data ----------------------------------------------------
+
+
+praw20 <-
+  tibble(files = list.files(mydir)) %>%
+  mutate(path = paste0(mydir, files)) %>%
+  filter(grepl('phen', files)) %>%
+  filter(grepl('2020', files)) %>%
+  filter(grepl('.xlsx', files)) %>%
+  mutate(data = path %>% map(read_excel, skip = 5)) %>%
+  select(data) %>%
+  unnest(cols = c(data)) %>%
+  fill(date, plot)
+
+p20 <-
+  praw20 %>%
+  mutate(date = as_date(date),
+         year = year(date),
+         doy = yday(date)) %>%
+  left_join(mrs_plotkey) %>%
+  mutate(plht_cm = NA,
+         totpl_no = NA,
+         pl_id = paste0("p", plot, "-", rep),
+         greenleaf_nu = ifelse(is.na(greenleaf_nu), potleaf_nu - deadleaf_nu, greenleaf_nu),
+         funleaves_nu = ifelse(is.na(funleaves_nu), greenleaf_nu, funleaves_nu),
+         stage = paste0(class, stage)) %>%
+  rename(pls_nu = totpl_no,
+         pl_stage = stage,
+         devleaves_nu = potleaf_nu,
+         grleaves_nu = greenleaf_nu) %>%
+  select(year, date, doy, plot_id, pls_nu,
+         pl_id, plht_cm, pl_stage,
+         devleaves_nu, grleaves_nu, funleaves_nu)
+
+
+
 # combine -----------------------------------------------------------------
 
 mrs_phen <-
   p18 %>%
   bind_rows(p19) %>%
+  bind_rows(p20) %>%
   arrange(year, date, doy, plot_id)
 
-# make lai and biomass datasets -------------------------------------------
+# save-------------------------------------------
 
 mrs_phen %>%  write_csv("data-raw/phen/phen.csv")
 

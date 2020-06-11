@@ -39,7 +39,18 @@ pk19 <- read_excel("data-raw/plotkey/rd_year-plot-trt-key2.xlsx",
 
 # need to do
 
-plotkey <- pk19
+# 2020 ---------------------------------------------------------------
+
+pk20 <- read_excel("data-raw/plotkey/rd_year-plot-trt-2020.xlsx") %>%
+  mutate(block = str_sub(plot, 1, 1),
+         rot_trt = str_sub(rot_trt, 1,2)) %>%
+  mutate(block = paste0("b", block)) %>%
+  select(year, block, plot, rot_trt, harv_crop) %>%
+  mutate(plot_id = paste(year, plot, sep = "_"))
+
+
+plotkey <- bind_rows(pk19, pk20) %>%
+  arrange(year, block, plot)
 
 plotkey %>%
   write_csv("data-raw/plotkey/plotkey.csv")

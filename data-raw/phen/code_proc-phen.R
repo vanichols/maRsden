@@ -1,15 +1,9 @@
-########################
-#
 # Date of creation: march 13 2020
-#
-# last updated:
-#
-# Purpose: Process 2018 and 2019 phenology data
-#
+# Purpose: Process all phenology data
 # NOTES:
 #
 #
-#########################
+# last updated: 6/12/2020, include 2020 data
 
 
 rm(list=ls())
@@ -39,7 +33,7 @@ p18 <-
          harv_crop = trt,
          block = paste0("b", rep),
          pl_id = paste0("p", plot, "-", phen_plno)) %>%
-  left_join(mrs_plotkey) %>%
+  left_join(mrs_plotkey %>% filter(year == 2018)) %>%
   #--name things nicer
   rename(pls_nu = phen_nopl,
          plht_cm = phen_plht_cm,
@@ -71,7 +65,7 @@ p19 <-
   mutate(date = as_date(date),
          year = year(date),
          doy = yday(date)) %>%
-  left_join(mrs_plotkey) %>%
+  left_join(mrs_plotkey %>% filter(year == 2019)) %>%
   #--deal w/ plant heights
   mutate(plht_cm = ifelse(is.na(plht_cm), plht_in * 2.54, plht_cm),
          pl_id = paste0("p", plot, "-", rep),
@@ -104,7 +98,7 @@ p20 <-
   mutate(date = as_date(date),
          year = year(date),
          doy = yday(date)) %>%
-  left_join(mrs_plotkey) %>%
+  left_join(mrs_plotkey %>% filter(year == 2020)) %>%
   mutate(plht_cm = NA,
          totpl_no = NA,
          pl_id = paste0("p", plot, "-", rep),
@@ -130,7 +124,5 @@ mrs_phen <-
   arrange(year, date, doy, plot_id)
 
 # save-------------------------------------------
-
-mrs_phen %>%  write_csv("data-raw/phen/phen.csv")
 
 usethis::use_data(mrs_phen, overwrite = T)

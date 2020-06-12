@@ -143,6 +143,8 @@ rd20 <-
 
 mrs_rootdepth <-
   bind_rows(rd18, rd19, rd20) %>%
+  mutate(year = year(date)) %>%
+  select(year, everything()) %>%
   arrange(date, plot_id)
 
 usethis::use_data(mrs_rootdepth, overwrite = T)

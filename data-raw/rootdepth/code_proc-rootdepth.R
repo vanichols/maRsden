@@ -84,7 +84,7 @@ rd19raw <-
 #--make a dummy planting (6/3/2020) data point w/rootdepth = 0
 plant19 <-
   pk %>%
-  filter(year == 2019, rot_trt %in% c("C4", "C2")) %>%
+  filter(year == 2019, harv_crop %in% c("C4", "C2")) %>%
   select(plot_id) %>%
   unique() %>%
   mutate(date = ymd("2019-06-03"),
@@ -95,6 +95,10 @@ rd19 <-
   rd19raw %>%
   bind_rows(plant19)
 
+rd19 %>%
+  ggplot(aes(doy, rootdepth_cm)) +
+  geom_point() +
+  scale_y_reverse()
 
 
 # 2020 data ---------------------------------------------------------------
@@ -102,7 +106,7 @@ rd19 <-
 #--corn was planted 4/23/2020
 plant20 <-
   pk %>%
-  filter(year == 2020, rot_trt %in% c("C4", "C2")) %>%
+  filter(year == 2020, harv_crop %in% c("C4", "C2")) %>%
   select(plot_id) %>%
   unique() %>%
   mutate(date = ymd("2020-04-23"),
@@ -146,5 +150,12 @@ mrs_rootdepth <-
   mutate(year = year(date)) %>%
   select(year, everything()) %>%
   arrange(date, plot_id)
+
+mrs_rootdepth %>%
+  ggplot(aes(doy, rootdepth_cm)) +
+  geom_point() +
+  facet_grid(.~year) +
+  scale_y_reverse()
+
 
 usethis::use_data(mrs_rootdepth, overwrite = T)

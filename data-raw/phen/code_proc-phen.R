@@ -1,15 +1,9 @@
-########################
-#
 # Date of creation: march 13 2020
-#
-# last updated:
-#
-# Purpose: Process 2018 and 2019 phenology data
-#
+# Purpose: Process all phenology data
 # NOTES:
 #
 #
-#########################
+# last updated: 6/12/2020, include 2020 data
 
 
 rm(list=ls())
@@ -30,7 +24,6 @@ mydir <- "data-raw/phen/"
 praw18 <- read_excel("data-raw/phen/rd_mars-phenology.xlsx",
                       skip = 5)
 
-
 p18 <-
   praw18 %>%
   mutate(date = as_date(date),
@@ -39,7 +32,7 @@ p18 <-
          harv_crop = trt,
          block = paste0("b", rep),
          pl_id = paste0("p", plot, "-", phen_plno)) %>%
-  left_join(mrs_plotkey) %>%
+  left_join(mrs_plotkey %>% filter(year == 2018)) %>%
   #--name things nicer
   rename(pls_nu = phen_nopl,
          plht_cm = phen_plht_cm,
@@ -50,6 +43,27 @@ p18 <-
   select(year, date, doy, plot_id, pls_nu,
          pl_id, plht_cm, pl_stage,
          devleaves_nu, grleaves_nu, funleaves_nu)
+
+
+#--2018 also did phenology 'unofficially' the days I sampled roots
+
+p18sup <-
+  read_excel("data-raw/rootdepth/rd_rootdepth18.xlsx", skip = 5) %>%
+  mutate(date = as_date(date),
+         year = year(date),
+         doy = yday(date),
+         harv_crop = trt,
+         block = paste0("b", block)) %>%
+  left_join(mrs_plotkey %>% filter(year == 2018)) %>%
+  select(year, date, doy, plot_id, stage) %>%
+  filter(stage != "planting") %>%
+  distinct() %>%
+  rename("pl_stage" = stage)
+
+
+p18all <-
+  p18 %>%
+  bind_rows(p18sup)
 
 
 # 2019 data ----------------------------------------------------
@@ -71,7 +85,7 @@ p19 <-
   mutate(date = as_date(date),
          year = year(date),
          doy = yday(date)) %>%
-  left_join(mrs_plotkey) %>%
+  left_join(mrs_plotkey %>% filter(year == 2019)) %>%
   #--deal w/ plant heights
   mutate(plht_cm = ifelse(is.na(plht_cm), plht_in * 2.54, plht_cm),
          pl_id = paste0("p", plot, "-", rep),
@@ -104,7 +118,7 @@ p20 <-
   mutate(date = as_date(date),
          year = year(date),
          doy = yday(date)) %>%
-  left_join(mrs_plotkey) %>%
+  left_join(mrs_plotkey %>% filter(year == 2020)) %>%
   mutate(plht_cm = NA,
          totpl_no = NA,
          pl_id = paste0("p", plot, "-", rep),
@@ -124,13 +138,11 @@ p20 <-
 # combine -----------------------------------------------------------------
 
 mrs_phen <-
-  p18 %>%
+  p18all %>%
   bind_rows(p19) %>%
   bind_rows(p20) %>%
   arrange(year, date, doy, plot_id)
 
 # save-------------------------------------------
-
-mrs_phen %>%  write_csv("data-raw/phen/phen.csv")
 
 usethis::use_data(mrs_phen, overwrite = T)

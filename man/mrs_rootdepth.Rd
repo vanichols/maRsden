@@ -4,7 +4,8 @@
 \name{mrs_rootdepth}
 \alias{mrs_rootdepth}
 \title{Maximum root depth across the season for 2018 and 2019}
-\format{A data frame with 104 rows and 6 variables:
+\format{
+A data frame with 104 rows and 6 variables:
 \describe{
 \item{year}{crop year of data collection}
 \item{date}{date of data collection in yyyy-mm-dd format}
@@ -13,7 +14,8 @@
 \item{stage}{corn stage of measurement; planting, V1-V12, R1-R6}
 \item{rootdepth_cm}{average of 4 sub-rep measurements in that plot}
 ...
-}}
+}
+}
 \usage{
 mrs_rootdepth
 }

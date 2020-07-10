@@ -232,17 +232,97 @@ pen19 %>%
   facet_grid(.~plot_id)
 
 
+# 2020 data ---------------------------------------------------------------
+
+
+jul20raw <- read_excel("data-raw/penetrom/rd_20200623-penet.xlsx", skip = 4)
+
+pen20 <-
+  jul20raw %>%
+  clean_names() %>%
+  select(-longitude, -latitude, -cone_size) %>%
+  rename(plot = plot_guess) %>%
+  #--remove 'Logger Started' rows
+  filter(number != 'Logger Started',
+         !is.na(plot)) %>%
+  #--assign date
+  mutate(date = ymd("2020-06-23"),
+         year = year(date),
+         doy = yday(date)) %>%
+  #--merge w/key
+  left_join(pk) %>%
+  #--Make and N column that matches sm data
+  mutate(N = str_trim( (str_sub(number, -2, -1))),
+         N = paste("N", N, sep = "")) %>%
+  #--gather depths into one col, make numeric
+  gather(x0_0_cm:x45_0_cm, key = "depth_cm", value = "resis_kpa") %>%
+  mutate(depth_cm = str_sub(depth_cm, start = 2, end = -4),
+         depth_cm = str_replace(depth_cm, "_", "."),
+         depth_cm = as.numeric(depth_cm),
+         soilpair_YN = 'N',
+         soilh2o_g.g = NA) %>%
+  #--weird 0 values and low values at >40 cm depth
+  filter(resis_kpa >0) %>%
+  filter(!(depth_cm > 40 & resis_kpa <500)) %>%
+  filter(!(depth_cm > 10 & resis_kpa <100)) %>%
+  #--create a sample id
+  mutate(samp_id = paste(plot_id, N, sep = "_")) %>%
+  select(year, date, doy, plot_id, samp_id, soilh2o_g.g, depth_cm, resis_kpa)
+
+
+
+pen20 %>%
+  ggplot(aes(depth_cm, resis_kpa, group = samp_id)) +
+  geom_line(size = 2) +
+  coord_flip() +
+  scale_x_reverse()  +
+  facet_grid(.~plot_id)
+
+pen20 %>%
+  left_join(pk) %>%
+  ggplot(aes(depth_cm, resis_kpa, group = samp_id)) +
+  geom_line(size = 2, aes(color = rot_trt)) +
+  coord_flip() +
+  scale_x_reverse()
+
+
+pen20 %>%
+  ggplot(aes(depth_cm, resis_kpa, group = N)) +
+  geom_line(size = 2, aes(color = doy)) +
+  coord_flip() +
+  scale_x_reverse()  +
+  facet_grid(.~plot_id)
+
 
 # combine 2018 and 2019 data ----------------------------------------------
 
 # average over sub-reps, so we only have one value for each plot
 
 mrs_penetrom <-
-  bind_rows(pen18, pen19) %>%
+  bind_rows(pen18, pen19, pen20) %>%
   group_by(year, date, doy, plot_id, depth_cm) %>%
   summarise(soilh2o_g.g = mean(soilh2o_g.g, na.rm = T),
             resis_kpa = mean(resis_kpa, na.rm = T)) %>%
   arrange(year, date, doy, plot_id, depth_cm)
+
+#--check it
+
+mrs_penetrom %>%
+  ggplot(aes(depth_cm, resis_kpa, plot_id)) +
+  geom_line(size = 2) +
+  coord_flip() +
+  scale_x_reverse()  +
+  facet_grid(.~date+plot_id)
+
+mrs_penetrom %>%
+  left_join(pk) %>%
+  ggplot(aes(depth_cm, resis_kpa, group = plot_id)) +
+  geom_line(size = 2, aes(color = rot_trt)) +
+  coord_flip() +
+  scale_x_reverse()  +
+  facet_grid(.~date) +
+  labs(title = "Soil Resistance at Marsden, 2018-2020")
+
 
 mrs_penetrom %>% write_csv("data-raw/penetrom/penetrom.csv")
 usethis::use_data(mrs_penetrom, overwrite = T)

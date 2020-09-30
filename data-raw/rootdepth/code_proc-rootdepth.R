@@ -159,3 +159,6 @@ mrs_rootdepth %>%
 
 
 usethis::use_data(mrs_rootdepth, overwrite = T)
+
+#--for matt
+write_csv(mrs_rootdepth, "data-raw/rootdepth/mrs_rootdepth.csv")

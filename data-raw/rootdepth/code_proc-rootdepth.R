@@ -5,6 +5,7 @@
 #              2019 planting has too many plots
 #              march 13 2020 (updated pkg structure, fixed phenology)
 #              june 12 2020 (add 2020 data)
+#              oct 2 2020 (i want raw values, don't average)
 #
 # purpose: Process max root depth data from 2018 and 2019
 #
@@ -34,8 +35,8 @@ rd18raw <- read_excel("data-raw/rootdepth/rd_rootdepth18.xlsx", skip = 5)
 rd18 <-
   rd18raw %>%
   mutate(date = as_date(date)) %>%
-  group_by(date, plot, trt, stage, block) %>%
-  summarise(rootdepth_in = mean(rootdepth_in, na.rm = T)) %>%
+  #group_by(date, plot, trt, stage, block) %>%
+  #summarise(rootdepth_in = mean(rootdepth_in, na.rm = T)) %>%
   mutate(year = year(date),
          doy = yday(date),
          block = paste0("b", block)) %>%
@@ -65,8 +66,9 @@ rd19raw <-
   unnest(cols = c(data)) %>%
   fill(date, plot) %>%
   mutate(mrd_cm = ifelse(is.na(maxrootdepth_cm), maxrootdepth_in*2.54, maxrootdepth_cm)) %>%
-  group_by(date, plot) %>%
-  summarise(mrd_cm = mean(mrd_cm, na.rm = T)) %>%
+  select(date, plot, mrd_cm) %>%
+  #group_by(date, plot) %>%
+  #summarise(mrd_cm = mean(mrd_cm, na.rm = T)) %>%
   ungroup() %>%
   mutate(date = as_date(date)) %>%
   # sampled over two days, fix it
@@ -129,9 +131,9 @@ rd20raw <-
   unnest(cols = c(data)) %>%
   fill(date, plot) %>%
   mutate(mrd_cm = ifelse(is.na(maxrootdepth_cm), maxrootdepth_in*2.54, maxrootdepth_cm)) %>%
-  group_by(date, plot) %>%
-  summarise(mrd_cm = mean(mrd_cm, na.rm = T)) %>%
-  ungroup() %>%
+  #group_by(date, plot) %>%
+  #summarise(mrd_cm = mean(mrd_cm, na.rm = T)) %>%
+  #ungroup() %>%
   mutate(date = as_date(date),
          doy = yday(date)) %>%
   left_join(pk %>% filter(year == 2020)) %>%

@@ -154,8 +154,9 @@ mrs_rootdepth <-
   arrange(date, plot_id)
 
 mrs_rootdepth %>%
+  left_join(pk) %>%
   ggplot(aes(doy, rootdepth_cm)) +
-  geom_point() +
+  geom_jitter(aes(color = rot_trt)) +
   facet_grid(.~year) +
   scale_y_reverse()
 

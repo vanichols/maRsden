@@ -79,6 +79,6 @@ mrs_earrows %>%
 
 
 
-mrs_earrows %>%  write_csv("data-raw/earrows/earrows.csv")
+mrs_earrows %>%  write_csv("data-raw/earrows/mrs_earrows.csv")
 
 usethis::use_data(mrs_earrows, overwrite = T)

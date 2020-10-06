@@ -72,4 +72,10 @@ mrs_cornylds %>%  write_csv("data-raw/yields/mrs_cornylds.csv")
 
 usethis::use_data(mrs_cornylds, overwrite = T)
 
-
+#--quick look
+library(ggplot2)
+mrs_cornylds %>%
+  left_join(pk) %>%
+  ggplot(aes(rot_trt, yield_Mgha)) +
+  stat_summary(fun.data = "mean_cl_boot", colour = "red", size = 2) +
+  facet_grid(.~year)

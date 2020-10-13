@@ -151,8 +151,12 @@ mrs_rootdepth <-
   bind_rows(rd18, rd19, rd20) %>%
   mutate(year = year(date)) %>%
   select(year, everything()) %>%
-  arrange(date, plot_id)
+  arrange(date, plot_id) %>%
+  group_by(year, date, doy, plot_id) %>%
+  mutate(subrep_id = paste(plot_id, 1:n(), sep = "-")) %>%
+  select(year, date, doy, plot_id, subrep_id, rootdepth_cm)
 
+#--check
 mrs_rootdepth %>%
   left_join(pk) %>%
   ggplot(aes(doy, rootdepth_cm)) +

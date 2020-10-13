@@ -1,80 +1,36 @@
 #############################
-##
-## Dec 16 2019
-## Process Iowa Mesonet files
-## Writes file to _tidy and put in package
-##
-## last updated: feb 18 2020 (added dates)
+#
+# created: Dec 16 2019
+# Process FACTS weather data from Ames site. Need to add 2020 still
+#
+# last updated: feb 18 2020 (added dates)
+#                oct 13 2020 (replaced it with qc'd facts weather)
 ##############################
 
 rm(list=ls())
 library(tidyverse)
 library(lubridate)
+library(readxl)
 
+# wea ----------------------------------------------------------------
 
-# h2o data ----------------------------------------------------------------
-
-
-wear <- read_csv("data-raw/_raw/wea/raw_wthr1987-2017_im.csv")
-wea18r <- read_csv("data-raw/_raw/wea/raw_wthr2018_im.csv")
+wea <- read_excel("data-raw/weather/raw_wea_ames-facts-1980-2019.xlsx")
 
 
 # wrangle -----------------------------------------------------------------
 
-# wea 'day' is a character, but wea18 day is a date, so must handle separately
-wea <-
-  wear %>%
-  mutate(date = as.character(day),
-         lubedate = mdy(date),
-         year = year(lubedate),
-         doy = yday(lubedate)) %>%
-  select(-date) %>%
-  rename(date = lubedate) %>%
-  select(year, date, doy, everything(), -day)
+doy_tib <- tibble::tibble(
+  date = seq(lubridate::ymd("2018-01-01"), lubridate::ymd("2020-12-31"), by = "1 day")) %>%
+  dplyr::mutate(day = lubridate::yday(date),
+                year = lubridate::year(date))
 
-wea18 <-
-  wea18r %>%
-  mutate(lubedate = ymd(day),
-         year = year(lubedate),
-         doy = yday(lubedate),
-         date = as_date(lubedate)) %>%
-  select(year, date, doy, everything(), -lubedate, -day)
-
-# bind weather years tog here
-dat <-
-  bind_rows(wea, wea18) %>%
-  arrange(year, doy) %>%
-  rename("hiT_c" = highc,
-         "loT_c" = lowc,
-         "precip_mm" = precipmm,
-         "narr_srad_mjday" = narr_srad) %>%
-  select(station, station_name, year, date, doy, everything())
-
-# viz check ---------------------------------------------------------------------
-
-dat %>%
-  ggplot(aes(doy, narr_srad_mjday)) +
-  geom_line(aes(color = year))
+#--get date
+mrs_wea <-
+  wea %>%
+  filter(year > 2017) %>%
+  left_join(doy_tib) %>%
+  select(date, year, day, everything())
 
 
-# write it ----------------------------------------------------------------
-
-# make a 2008-present dataset, and a historical one
-# to tidy folder (just for reference?)
-
-#--weather 2008-present
-mrs_wea_08_pres <-
-  dat %>%
-  filter(year > 2007)
-
-mrs_wea_08_pres %>% write_csv("data-raw/_tidy/wea_08_pres.csv")
-usethis::use_data(mrs_wea_08_pres, overwrite = T)
-
-#--historical weather 1987-present
-mrs_wea_hist <-
-  dat  %>%
-  filter(year > 1986)
-
-mrs_wea_hist %>% write_csv("data-raw/_tidy/wea_hist.csv")
-usethis::use_data(mrs_wea_hist, overwrite = T)
-
+mrs_wea %>% write_csv("data-raw/weather/mrs_wea.csv")
+usethis::use_data(mrs_wea, overwrite = T)

@@ -24,9 +24,11 @@ library(janitor) #--used to clean data
 
 pk <- read_csv("data-raw/plotkey/plotkey.csv")
 
-#--has it's own format, I don't want to tuse this as I don't currently have the raw data...
-#d17 <- read_csv("data-raw/yields/raw/rd_cornyld_2003-17.csv", skip = 4) %>%
-#  arrange(year) %>%
+
+#--2008 onwards plots were managed the same.
+#--2003-2007 the C2 was conventional herb and C3/C4 were low input herb (ie tillage)
+#--currently plot key only goes back to 2012, so yields are only presesnted for 2012-2017
+dhist <- read_csv("data-raw/yields/raw/rd_cornyld-2012-2017.csv")
 
 
 d18 <-
@@ -65,7 +67,9 @@ mrs_cornylds <-
   bind_rows(d20) %>%
   left_join(pk) %>%
   ungroup() %>%
-  select(plot_id, yield_Mgha)
+  select(plot_id, yield_Mgha) %>%
+  bind_rows(dhist) %>%
+  arrange(plot_id)
 
 
 mrs_cornylds %>%  write_csv("data-raw/yields/mrs_cornylds.csv")
@@ -79,3 +83,5 @@ mrs_cornylds %>%
   ggplot(aes(rot_trt, yield_Mgha)) +
   stat_summary(fun.data = "mean_cl_boot", colour = "red", size = 2) +
   facet_grid(.~year)
+
+ggsave("data-raw/yields/fig_corn-yields.png")

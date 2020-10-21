@@ -154,35 +154,29 @@ july %>%
 
 # Combine may and july 2018 data ------------------------------------------
 
-pen18 <- bind_rows(may, july) %>%
-  select(year, date, doy, plot_id, soilh2o_g.g, depth_cm, resis_kpa)
+pen18 <-
+  bind_rows(may, july) %>%
+  mutate(rep = ifelse(depth_cm == 0, 1, 0)) %>%
+  group_by(plot_id) %>%
+  mutate(rep_id0 = cumsum(rep),
+         rep_id = paste(plot_id, rep_id0, sep = "-")) %>%   #--I'm so clever :|
+  select(year, date, doy, plot_id, rep_id, soilh2o_g.g, depth_cm, resis_kpa)
+
+
 
 
 # look at it --------------------------------------------------------------
 
-dat %>%
-  separate(site_yr, into = c("site", "year"), remove = F) %>%
-  mutate(site_ID = group_indices(., site))
-
-
-# argh I don't include rep...
 pen18 %>%
-  mutate(rep = ifelse(depth_cm == 0, 1, 0)) %>%
-  ungroup() %>%
-  mutate(rep_id = cumsum(rep)) %>% #--I'm so clever :|
   filter(doy >160) %>%
-  filter(plot_id %in% c("2018_13", "2018_18")) %>%
-  #group_by(doy, plot_id, depth_cm) %>%
-  #summarise(resis_kpa = mean(resis_kpa)) %>%
-  mutate(group_id = group_indices(., plot_id)) %>%
+#  filter(plot_id %in% c("2018_13", "2018_18")) %>%
   ggplot(aes(depth_cm, resis_kpa, group = rep_id)) +
   geom_point(size = 2) +
   geom_line() +
-  stat_summary(fun.y = mean, geom = "point", color = "red") +
+  stat_summary(fun = mean, geom = "point", color = "red") +
   coord_flip() +
   scale_x_reverse()  +
   facet_grid(.~plot_id)
-
 
 # 2019 data ---------------------------------------------------------------
 
@@ -218,15 +212,21 @@ pen19 <-
   #--weird 0 values and low values at >40 cm depth
   filter(resis_kpa >0) %>%
   filter(!(depth_cm > 40 & resis_kpa <500)) %>%
-  select(year, date, doy, plot_id, soilh2o_g.g, depth_cm, resis_kpa)
+  #--create rep_id
+  arrange(year, date, plot_id, N, depth_cm) %>%
+  mutate(rep = ifelse(depth_cm == 0, 1, 0)) %>%
+  group_by(plot_id) %>%
+  mutate(rep_id0 = cumsum(rep),
+         rep_id = paste(plot_id, rep_id0, sep = "-")) %>%   #--I'm so clever :|
+  select(year, date, doy, plot_id, rep_id, soilh2o_g.g, depth_cm, resis_kpa)
+
 
 
 pen19 %>%
-  group_by(doy, plot_id, depth_cm) %>%
-  summarise(resis_kpa = mean(resis_kpa)) %>%
-
-  ggplot(aes(depth_cm, resis_kpa, group = doy)) +
-  geom_line(size = 2, aes(color = doy)) +
+  ggplot(aes(depth_cm, resis_kpa, group = rep_id)) +
+  geom_point(size = 2) +
+  geom_line() +
+  stat_summary(fun = mean, geom = "point", color = "red") +
   coord_flip() +
   scale_x_reverse()  +
   facet_grid(.~plot_id)
@@ -262,59 +262,45 @@ pen20 <-
          soilpair_YN = 'N',
          soilh2o_g.g = NA) %>%
   #--weird 0 values and low values at >40 cm depth
-  filter(resis_kpa >0) %>%
+  filter(!(resis_kpa == 0 & depth_cm > 0)) %>%
   filter(!(depth_cm > 40 & resis_kpa <500)) %>%
   filter(!(depth_cm > 10 & resis_kpa <100)) %>%
-  #--create a sample id
-  mutate(samp_id = paste(plot_id, N, sep = "_")) %>%
-  select(year, date, doy, plot_id, samp_id, soilh2o_g.g, depth_cm, resis_kpa)
-
-
-
-pen20 %>%
-  ggplot(aes(depth_cm, resis_kpa, group = samp_id)) +
-  geom_line(size = 2) +
-  coord_flip() +
-  scale_x_reverse()  +
-  facet_grid(.~plot_id)
+  #--create rep_id
+  arrange(year, date, plot_id, N, depth_cm) %>%
+  mutate(rep = ifelse(depth_cm == 0, 1, 0)) %>%
+  group_by(plot_id) %>%
+  mutate(rep_id0 = cumsum(rep),
+         rep_id = paste(plot_id, rep_id0, sep = "-")) %>%   #--I'm so clever :|
+  select(year, date, doy, plot_id, rep_id, soilh2o_g.g, depth_cm, resis_kpa)
 
 pen20 %>%
-  left_join(pk) %>%
-  ggplot(aes(depth_cm, resis_kpa, group = samp_id)) +
-  geom_line(size = 2, aes(color = rot_trt)) +
-  coord_flip() +
-  scale_x_reverse()
-
-
-pen20 %>%
-  ggplot(aes(depth_cm, resis_kpa, group = N)) +
-  geom_line(size = 2, aes(color = doy)) +
+  ggplot(aes(depth_cm, resis_kpa, group = rep_id)) +
+  geom_point(size = 2) +
+  geom_line() +
+  stat_summary(fun = mean, geom = "point", color = "red") +
   coord_flip() +
   scale_x_reverse()  +
   facet_grid(.~plot_id)
 
 
-# combine 2018 and 2019 data ----------------------------------------------
-
-# average over sub-reps, so we only have one value for each plot
+# combine 2018, 2019, and 2020 data ----------------------------------------------
 
 mrs_penetrom <-
   bind_rows(pen18, pen19, pen20) %>%
+  arrange(year, date, doy, plot_id, rep_id, depth_cm)
+
+# average over sub-reps, so we only have one value for each plot
+
+mrs_penetrom_means <-
+  mrs_penetrom %>%
   group_by(year, date, doy, plot_id, depth_cm) %>%
   summarise(soilh2o_g.g = mean(soilh2o_g.g, na.rm = T),
             resis_kpa = mean(resis_kpa, na.rm = T)) %>%
   arrange(year, date, doy, plot_id, depth_cm)
 
-#--check it
+#--check it, make graph
 
-mrs_penetrom %>%
-  ggplot(aes(depth_cm, resis_kpa, plot_id)) +
-  geom_line(size = 2) +
-  coord_flip() +
-  scale_x_reverse()  +
-  facet_grid(.~date+plot_id)
-
-mrs_penetrom %>%
+mrs_penetrom_means %>%
   left_join(pk) %>%
   ggplot(aes(depth_cm, resis_kpa, group = plot_id)) +
   geom_line(size = 2, aes(color = rot_trt)) +
@@ -322,6 +308,8 @@ mrs_penetrom %>%
   scale_x_reverse()  +
   facet_grid(.~date) +
   labs(title = "Soil Resistance at Marsden, 2018-2020")
+
+ggsave("data-raw/penetrom/fig_penetrometer.png")
 
 
 mrs_penetrom %>% write_csv("data-raw/penetrom/penetrom.csv")

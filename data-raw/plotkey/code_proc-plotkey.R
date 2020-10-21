@@ -22,6 +22,9 @@ library(readxl)
 #   mutate(plot_id = paste(year, plot, sep = "_"))
 
 
+# 2008 through 2011 -------------------------------------------------------
+
+# need to do
 
 
 # 2012-2019 ---------------------------------------------------------------
@@ -35,9 +38,6 @@ pk19 <- read_excel("data-raw/plotkey/rd_year-plot-trt-key2.xlsx",
   mutate(plot_id = paste(year, plot, sep = "_"))
 
 
-# 2008 through 2011 -------------------------------------------------------
-
-# need to do
 
 # 2020 ---------------------------------------------------------------
 
@@ -52,10 +52,29 @@ pk20 <- read_excel("data-raw/plotkey/rd_year-plot-trt-2020.xlsx") %>%
 plotkey <- bind_rows(pk19, pk20) %>%
   arrange(year, block, plot)
 
+
+# make a map thing --------------------------------------------------------
+
+mrs_plotcoords <-
+  plotkey %>%
+  select(plot) %>%
+  mutate(
+    plot_group = ifelse(plot < 30, 1, 2),
+    x = ifelse(plot_group == 1, plot - 10, plot - 30),
+    xend = x + 1,
+    y = ifelse(plot_group == 2, 0, 6),
+    yend = ifelse(plot_group == 2, 5, 11)) %>%
+  select(-plot_group)
+
 plotkey %>%
   write_csv("data-raw/plotkey/plotkey.csv")
 
 mrs_plotkey <- plotkey
 usethis::use_data(mrs_plotkey, overwrite = T)
 
+mrs_plotcoords %>%
+  write_csv("data-raw/plotkey/plotcoords.csv")
+
+usethis::use_data(mrs_plotkey, overwrite = T)
+usethis::use_data(mrs_plotcoords, overwrite = T)
 

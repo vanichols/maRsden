@@ -9,7 +9,7 @@ Description: Currently houses all data collected by Gina, but will ultimately ho
     Marsden Farm Cropping Systems Experiment, managed by Dr. Matt Liebman (mliebman@iastate.edu)
 License: MIT + file LICENSE
 Encoding: UTF-8
-Depends: R (>= 3.1.0)
+Depends: R (>= 3.5.0)
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0

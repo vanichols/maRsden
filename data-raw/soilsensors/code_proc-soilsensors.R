@@ -46,12 +46,14 @@ ssraw <-
   bind_rows(ssraw19)
 
 
-ss <- ssraw %>%
+ss <-
+  ssraw %>%
   left_join(pk) %>%
   select(year, date, doy, plot_id,
          sensor_type, sensor_name, sensor_depth_cm, sensor_unit, value)
 
 
+#--viz check
 #--these probably need scaled somehow....
 ss %>%
   filter(sensor_unit == "soilVWC") %>%
@@ -60,11 +62,29 @@ ss %>%
   geom_line(aes(color = rot_trt)) +
   facet_grid(sensor_depth_cm~year)
 
+ss %>%
+  filter(sensor_unit == "soilVWC") %>%
+  left_join(pk) %>%
+  group_by(doy, date, rot_trt, year, sensor_depth_cm) %>%
+  summarise(value = mean(value, na.rm = T)) %>%
+  ggplot(aes(doy, value, group = rot_trt)) +
+  geom_line(aes(color = rot_trt)) +
+  facet_grid(sensor_depth_cm~year)
+
+
+ss %>%
+  filter(sensor_unit == "wtdepth_mm", doy < 300) %>%
+  left_join(pk) %>%
+  ggplot(aes(doy, value, group = plot_id)) +
+  geom_line(aes(color = plot_id)) +
+  scale_y_reverse(limits = c(3000, 0)) +
+  facet_grid(.~year)
 
 
 # make datasets -------------------------------------------
 
-mrs_soilsensors <- ss %>%
+mrs_soilsensors <-
+  ss %>%
   arrange(year, doy, plot_id, sensor_depth_cm)
 
 mrs_soilsensors %>%  write_csv("data-raw/soilsensors/soilsensors.csv")

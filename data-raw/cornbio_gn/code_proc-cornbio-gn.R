@@ -2,8 +2,8 @@
 #
 # Date of creation: Dec 18 2019
 # Author: Gina
-# Purpose: Process 2018 and 2019 biomass and associated LAI data
-# NOTES:
+# Purpose: Process 2018 and 2019 biomass
+# NOTES: COmbine it with Will's in a another dataset
 #
 # In 2019, it was always 8 plants
 # # I was inconsistent where I lumped the ear husks, so they are included in stem/tass
@@ -15,6 +15,7 @@
 # # once I started partitioning the ears, the ears value is blank
 #
 # Last updated: Feb 18 2020: added date
+#                  Jan 15 20201, trying to fix ears thing, separating grain500 to another dataset
 #
 #########################
 
@@ -27,7 +28,7 @@ library(janitor) #--used to clean data
 
 pk <- read_csv("data-raw/plotkey/plotkey.csv")
 
-mydir <- "data-raw/cornbio/"
+mydir <- "data-raw/cornbio_gn/"
 
 
 
@@ -35,7 +36,7 @@ mydir <- "data-raw/cornbio/"
 
 # this is a fucking mess.
 
-bm18raw <- read_excel("data-raw/cornbio/rd_mars-destructive_sampling.xlsx",
+bm18raw <- read_excel("data-raw/cornbio_gn/rd_mars-destructive_sampling.xlsx",
                       skip = 5,
                       na = "NA") %>%
   mutate(date = as_date(date),
@@ -52,19 +53,23 @@ bm18 <-
          ds_gleafwtsubsam_g, ds_gleafwtother_g, ds_deadleafwt_g,
          ds_stemtass_g, ds_ears_g, ds_husks_g,
          ds_cobs_g, ds_kernals_g, ds_krnl500_g) %>%
-  # To be consistent with Will, need:
-  # plant, leaf, stalk, cob/tassle, grain. SO let's make it stalk/cob/tassle
+  # I was inconsistent where I lumped the ear husks, so they are included in stem/tass
+  # call it 'ear', sum of cob and kernals
+  # do leaf, stemtasshusk, ear, plant
   mutate(leaf = ds_gleafwtsubsam_g + ds_gleafwtother_g + ds_deadleafwt_g,
-         stalkcobtass = ds_stemtass_g + ds_husks_g + ds_cobs_g + ds_ears_g,
-         grain = ds_kernals_g,
-         grain500 = ds_krnl500_g,
-         plant = leaf + stalkcobtass + grain,
+         stemtasshusk = ds_stemtass_g + ds_husks_g ,
+         ear = ds_ears_g + ds_kernals_g + ds_cobs_g, #-this works for 2018, I either did ear or kernal+cob
+         plant = leaf + stemtasshusk + ear,
          nu_pl = ds_nopl) %>%
   select(-contains("ds")) %>%
   gather(leaf:plant, key = organ, value = mass_g) %>%
   mutate(mass_gpl = mass_g/nu_pl) %>%
   select(year, date, doy, plot_id, organ, mass_g, mass_gpl)
 
+
+bm18 %>%
+  ggplot(aes(doy, mass_gpl, color = organ)) +
+  geom_point()
 
 # 2019 biomass ----------------------------------------------------
 
@@ -81,7 +86,7 @@ bm19raw <-
   fill(date, plot)
 
 
-bm19 <-
+bm19a <-
   bm19raw %>%
   # subtract weight of bag
   mutate(wgtbag_g = ifelse(is.na(wgtbag_g), 0, wgtbag_g),
@@ -95,28 +100,32 @@ bm19 <-
   left_join(pk) %>%
   select(year, date, doy, plot_id, organ, wgt_g) %>%
   arrange(year, date, doy, plot_id) %>%
-  spread(organ, value = wgt_g) %>%
-  # To be consistent with Will, need:
-  # plant, leaf, stalk, cob/tassle, grain. SO let's make it stalk/cob/tassle
-  mutate(stalkcobtass = stemtass + ear_husk + ear_cob,
-         grain = ear_kernals,
-         grain500 = kernals500,
+  pivot_wider(names_from = organ, values_from = wgt_g)
+
+
+bm19b <-
+  bm19a %>%
+  # do leaf, stemtasshusk, ear, plant
+  mutate(stemtasshusk = stemtass + ear_husk,
+         ear =  ear,
          leaf = brnleaf + LAIgleaf + othergleaf,
-         plant = stalkcobtass + grain + leaf) %>%
+         plant = stemtasshusk + ear + leaf) %>%
   select(year, date, doy,
          plot_id,
-         plant, leaf, stalkcobtass, grain, grain500) %>%
-  gather(plant:grain500, key = organ, value = mass_g) %>%
+         plant, leaf, stemtasshusk, ear) %>%
+  pivot_longer(plant:ear) %>%
+  rename("organ" = name,
+         "mass_g" = value) %>%
   mutate(mass_gpl = mass_g/8)  #--always 8 plants in 2019
 
 
-# make lai and biomass datasets -------------------------------------------
+# combine my datasets -------------------------------------------
 
-mrs_cornbio <-
-  bind_rows(bm18, bm19) %>%
+mrs_cornbio_gn <-
+  bind_rows(bm18, bm19b) %>%
   arrange(year, date, doy, plot_id, organ) %>%
   mutate_if(is.numeric, replace_na, 0)
 
-mrs_cornbio %>%  write_csv("data-raw/cornbio/cornbio.csv")
+mrs_cornbio_gn %>%  write_csv("data-raw/cornbio_gn/cornbio_gn.csv")
 
-usethis::use_data(mrs_cornbio, overwrite = T)
+usethis::use_data(mrs_cornbio_gn, overwrite = T)

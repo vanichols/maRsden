@@ -2,19 +2,9 @@
 #
 # Date of creation: Dec 18 2019
 # Author: Gina
-# Purpose: Process 2018 and 2019 biomass and associated LAI data
+# Purpose: Process 2018 and 2019 LAI data (Will didn't collect this, I don't htink)
 # NOTES:
 #
-# In 2019, it was always 8 plants
-# # I was inconsistent where I lumped the ear husks, so they are included in stem/tass
-# # ear is first measured on 8/1, w/no husk values
-# # ear is reported on 8/19, again w/no husk values
-# # on 9/20 there is ear, but also husk, cob, kernals.
-# #   for this date, the ear value is the sum of cob and kernals (500 were taken out later)
-# In 2018, num of plants differed
-# # once I started partitioning the ears, the ears value is blank
-#
-# Last updated: Feb 18 2020: added date
 #
 #########################
 

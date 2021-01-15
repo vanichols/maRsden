@@ -28,9 +28,6 @@ library(janitor) #--used to clean data
 
 pk <- read_csv("data-raw/plotkey/plotkey.csv")
 
-mydir <- "data-raw/cornbio_gn/"
-
-
 
 # 2018 data ---------------------------------------------------------------
 
@@ -73,11 +70,13 @@ bm18 %>%
 
 # 2019 biomass ----------------------------------------------------
 
+my19dir <- "data-raw/cornbio_gn/2019-data/"
+
 #--biomass
 
 bm19raw <-
-  tibble(files = list.files(mydir)) %>%
-  mutate(path = paste0(mydir, files)) %>%
+  tibble(files = list.files(my19dir)) %>%
+  mutate(path = paste0(my19dir, files)) %>%
   filter(grepl('biomass', files)) %>%
   filter(grepl(".xlsx", files)) %>%
   mutate(data = path %>% map(read_excel, skip = 5)) %>%
@@ -105,6 +104,7 @@ bm19a <-
 
 bm19b <-
   bm19a %>%
+  mutate_if(is.numeric, replace_na, 0) %>%
   # do leaf, stemtasshusk, ear, plant
   mutate(stemtasshusk = stemtass + ear_husk,
          ear =  ear,
@@ -122,10 +122,64 @@ bm19b %>%
   ggplot(aes(doy, mass_gpl, color = organ)) +
   geom_point()
 
+
+# 2020 --------------------------------------------------------------------
+
+my20dir <- "data-raw/cornbio_gn/2020-data/"
+
+#--biomass
+
+bm20raw <-
+  tibble(files = list.files(my20dir)) %>%
+  mutate(path = paste0(my20dir, files)) %>%
+  filter(grepl('biomass', files)) %>%
+  filter(grepl(".xlsx", files)) %>%
+  mutate(data = path %>% map(read_excel, skip = 5)) %>%
+  select(data) %>%
+  unnest(cols = c(data)) %>%
+  fill(date, plot)
+
+
+bm20a <-
+  bm20raw %>%
+  # fix date
+  mutate(date = as_date(date),
+         year = year(date),
+         doy = yday(date)) %>%
+  left_join(pk) %>%
+  rename("wgt_g" = weight_g) %>%
+  select(year, date, doy, plot_id, organ, wgt_g) %>%
+  arrange(year, date, doy, plot_id) %>%
+  pivot_wider(names_from = organ, values_from = wgt_g)
+
+
+bm20b <-
+  bm20a %>%
+  mutate_if(is.numeric, replace_na, 0) %>%
+  # do leaf, stemtasshusk, ear, plant
+  mutate(stemtasshusk = stem + reprod + stemtass,
+         ear =  ear,
+         leaf = greenleaf + brnleaf,
+         plant = stemtasshusk + ear + leaf) %>%
+  select(year, date, doy,
+         plot_id,
+         plant, leaf, stemtasshusk, ear) %>%
+  pivot_longer(plant:ear) %>%
+  rename("organ" = name,
+         "mass_g" = value) %>%
+  mutate(mass_gpl = mass_g/8)  #--always 8 plants in 2020?
+
+bm20b
+
+bm20b %>%
+  ggplot(aes(doy, mass_gpl, color = organ)) +
+  geom_point()
+
+
 # combine my datasets -------------------------------------------
 
 mrs_cornbio_gn <-
-  bind_rows(bm18, bm19b) %>%
+  bind_rows(bm18, bm19b, bm20b) %>%
   arrange(year, date, doy, plot_id, organ) %>%
   mutate_if(is.numeric, replace_na, 0)
 

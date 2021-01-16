@@ -44,7 +44,7 @@ bm18raw <- read_excel("data-raw/cornbio_gn/rd_mars-destructive_sampling.xlsx",
   left_join(pk)
 
 
-bm18 <-
+bm18a <-
   bm18raw %>%
   select(year, date, doy, plot_id, ds_nopl,
          ds_gleafwtsubsam_g, ds_gleafwtother_g, ds_deadleafwt_g,
@@ -64,7 +64,29 @@ bm18 <-
   select(year, date, doy, plot_id, organ, mass_g, mass_gpl)
 
 
-bm18 %>%
+#--add planting date, 5/8, 0 biomass point
+
+plots18 <-
+  bm18 %>%
+  pull(plot_id) %>%
+  unique()
+
+organs18 <- bm18 %>% pull(organ) %>% unique()
+
+bm18pl <-
+  tibble(year = rep(2018, length(plots18)*length(organs18)),
+         date = as_date("2018-04-23"),
+         doy = yday(date),
+         plot_id = rep(plots18, each = length(organs18)),
+         organ = rep(organs18, times = 8),
+         mass_g = 0,
+         mass_gpl = 0)
+
+bm18b <-
+  bm18pl %>%
+  bind_rows(bm18a)
+
+bm18b %>%
   ggplot(aes(doy, mass_gpl, color = organ)) +
   geom_point()
 
@@ -118,7 +140,32 @@ bm19b <-
          "mass_g" = value) %>%
   mutate(mass_gpl = mass_g/8)  #--always 8 plants in 2019
 
-bm19b %>%
+
+#--add planting date, 6/3, 0 biomass point
+
+plots19 <-
+  bm19b %>%
+  pull(plot_id) %>%
+  unique()
+
+organs19 <- bm19b %>% pull(organ) %>% unique()
+
+bm19pl <-
+  tibble(year = rep(2019, length(plots19)*length(organs19)),
+         date = as_date("2019-06-03"),
+         doy = yday(date),
+         plot_id = rep(plots19, each = length(organs19)),
+         organ = rep(organs19, times = 8),
+         mass_g = 0,
+         mass_gpl = 0)
+
+bm19c <-
+  bm19pl %>%
+  bind_rows(bm19b)
+
+
+
+bm19c %>%
   ggplot(aes(doy, mass_gpl, color = organ)) +
   geom_point()
 
@@ -169,9 +216,31 @@ bm20b <-
          "mass_g" = value) %>%
   mutate(mass_gpl = mass_g/8)  #--always 8 plants in 2020?
 
-bm20b
 
-bm20b %>%
+#--add planting date, 4/23, 0 biomass point
+
+plots20 <-
+  bm20b %>%
+  pull(plot_id) %>%
+  unique()
+
+organs20 <- bm20b %>% pull(organ) %>% unique()
+
+bm20pl <-
+  tibble(year = rep(2020, length(plots20)*length(organs20)),
+         date = as_date("2020-04-23"),
+         doy = yday(date),
+         plot_id = rep(plots20, each = length(organs20)),
+         organ = rep(organs20, times = 8),
+         mass_g = 0,
+         mass_gpl = 0)
+
+bm20c <-
+  bm20pl %>%
+  bind_rows(bm20b)
+
+
+bm20c %>%
   ggplot(aes(doy, mass_gpl, color = organ)) +
   geom_point()
 
@@ -179,9 +248,14 @@ bm20b %>%
 # combine my datasets -------------------------------------------
 
 mrs_cornbio_gn <-
-  bind_rows(bm18, bm19b, bm20b) %>%
+  bind_rows(bm18b, bm19c, bm20c) %>%
   arrange(year, date, doy, plot_id, organ) %>%
   mutate_if(is.numeric, replace_na, 0)
+
+mrs_cornbio_gn %>%
+  ggplot(aes(doy, mass_gpl)) +
+  geom_point(aes(color = organ)) +
+  facet_grid(.~year)
 
 mrs_cornbio_gn %>%  write_csv("data-raw/cornbio_gn/cornbio_gn.csv")
 

@@ -26,17 +26,7 @@ gn <- read_csv("data-raw/cornbio_gn/cornbio_gn.csv")
 
 # just keep full plant data -----------------------------------------------
 
-wo %>%
-  filter(organ == "plant") %>%
-  mutate(mass_gpl = mass_g/4) %>% #--will did 4 corn plants
-  bind_rows(gn %>% filter(organ == "plant")) %>%
-  left_join(pk) %>%
-  filter(rot_trt %in% c("2y", "4y")) %>%
-  ggplot(aes(doy, mass_gpl)) +
-  geom_point(aes(color = rot_trt)) +
-  facet_grid(.~year)
 
-#--note my 2020 data is still missing
 mrs_cornbio <-
   wo %>%
   filter(organ == "plant") %>%
@@ -45,6 +35,14 @@ mrs_cornbio <-
   left_join(pk) %>%
   filter(rot_trt %in% c("2y", "4y")) %>%
   select(year, date, doy, plot_id, mass_gpl)
+
+
+mrs_cornbio %>%
+  left_join(pk) %>%
+  ggplot(aes(doy, mass_gpl)) +
+  geom_point(aes(color = rot_trt)) +
+  facet_grid(.~year)
+
 
 mrs_cornbio %>%  write_csv("data-raw/cornbio/cornbio.csv")
 usethis::use_data(mrs_cornbio, overwrite = T)

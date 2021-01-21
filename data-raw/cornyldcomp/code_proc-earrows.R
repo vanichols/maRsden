@@ -26,7 +26,7 @@ pk <- read_csv("data-raw/plotkey/plotkey.csv") %>%
 
 # 2018 data ---------------------------------------------------------------
 
-graw18 <- read_excel("data-raw/earrows/rd_mars-grain-samples-2018.xlsx",
+graw18 <- read_excel("data-raw/cornyldcomp/rd_mars-grain-samples-2018.xlsx",
                    skip = 5,
                    na = "NA")
 
@@ -45,7 +45,7 @@ mrs_earrows18 <-
 
 # 2020 data ---------------------------------------------------------------
 
-graw20 <- read_excel("data-raw/earrows/rd_mars-grain-samples-2020.xlsx",
+graw20 <- read_excel("data-raw/cornyldcomp/rd_mars-grain-samples-2020.xlsx",
                    skip = 5,
                    na = "NA")
 
@@ -79,6 +79,6 @@ mrs_earrows %>%
 
 
 
-mrs_earrows %>%  write_csv("data-raw/earrows/mrs_earrows.csv")
+mrs_earrows %>%  write_csv("data-raw/cornyldcomp/mrs_earrows.csv")
 
 usethis::use_data(mrs_earrows, overwrite = T)

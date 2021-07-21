@@ -137,7 +137,7 @@ d117 <-
   fill(plot, rotation) %>%
   mutate(plot_id = paste(year, plot, sep = "_")) %>%
   #rename("root_weights_g" = root_weight_g) %>%
-  select(date, plot_id, depth, days_after_planting, root_weights_g)  %>%
+  select(year, date, plot_id, depth, days_after_planting, root_weights_g)  %>%
   mutate(root_weights_g = as.numeric(root_weights_g))
 
 rd20 <-

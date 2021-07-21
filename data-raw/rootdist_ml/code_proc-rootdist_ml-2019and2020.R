@@ -19,7 +19,7 @@ library(janitor) #--used to clean data
 
 
 pk <- read_csv("data-raw/plotkey/plotkey.csv") %>%
-  filter(year == 2019)
+  filter(year %in% c(2019, 2020))
 
 
 # 2019 --------------------------------------------------------------------
@@ -38,7 +38,10 @@ rd19 <-
   #--he specifies the side of the plot, doesn't matter for my purposes
   mutate(plot = parse_number(plot)) %>%
   left_join(pk) %>%
-  select(year, date, days_after_planting, depth, plot_id, root_weights_g)
+  select(year, date, days_after_planting, depth, plot_id, root_weights_g, soil_volume_cm_3, mass_volume_g_cm_3) %>%
+  rename("roots_gcm3" = mass_volume_g_cm_3,
+         "roots_g" = root_weights_g,
+         "soilvol_cm3" = soil_volume_cm_3)
 
 rd19
 
@@ -56,8 +59,12 @@ d4 <-
          days_after_planting = 4) %>%
   fill(plot, rotation) %>%
   mutate(plot_id = paste(year, plot, sep = "_")) %>%
-select(date, plot_id, depth, days_after_planting, root_weights_g)  %>%
-  mutate(root_weights_g = as.numeric(root_weights_g))
+  mutate(
+    roots_g = as.numeric(root_weights_g),
+    soilvol_cm3 = as.numeric(soil_area_cm_3),
+    roots_gcm3 = as.numeric(mass_area_g_cm_3)) %>%
+  select(date, plot_id, depth, days_after_planting, roots_g, soilvol_cm3, roots_gcm3)
+
 
 
 d27 <-
@@ -72,8 +79,11 @@ d27 <-
          days_after_planting = 27) %>%
   fill(plot, rotation) %>%
   mutate(plot_id = paste(year, plot, sep = "_")) %>%
-  select(date, plot_id, depth, days_after_planting, root_weights_g)  %>%
-  mutate(root_weights_g = as.numeric(root_weights_g))
+  mutate(
+    roots_g = as.numeric(root_weights_g),
+    soilvol_cm3 = as.numeric(soil_area_cm_3),
+    roots_gcm3 = as.numeric(mass_area_g_cm_3)) %>%
+  select(date, plot_id, depth, days_after_planting, roots_g, soilvol_cm3, roots_gcm3)
 
 d50 <-
   read_excel("data-raw/rootdist_ml/2020-data-from-matt/Marsden 2020 Root Biomass Data_12Feb2021.xlsx",
@@ -87,9 +97,12 @@ d50 <-
          days_after_planting = 50) %>%
   fill(plot, rotation) %>%
   mutate(plot_id = paste(year, plot, sep = "_")) %>%
-  rename("root_weights_g" = root_weight_g) %>%
-  select(date, plot_id, depth, days_after_planting, root_weights_g)  %>%
-  mutate(root_weights_g = as.numeric(root_weights_g))
+  mutate(
+    roots_g = as.numeric(root_weight_g),
+    soilvol_cm3 = as.numeric(soil_area_cm_3),
+    roots_gcm3 = as.numeric(mass_area_g_cm_3)) %>%
+  select(date, plot_id, depth, days_after_planting, roots_g, soilvol_cm3, roots_gcm3)
+
 
 d68 <-
   read_excel("data-raw/rootdist_ml/2020-data-from-matt/Marsden 2020 Root Biomass Data_12Feb2021.xlsx",
@@ -103,9 +116,11 @@ d68 <-
          days_after_planting = 68) %>%
   fill(plot, rotation) %>%
   mutate(plot_id = paste(year, plot, sep = "_")) %>%
-  rename("root_weights_g" = root_weight_g) %>%
-  select(date, plot_id, depth, days_after_planting, root_weights_g)  %>%
-  mutate(root_weights_g = as.numeric(root_weights_g))
+  mutate(
+    roots_g = as.numeric(root_weight_g),
+    soilvol_cm3 = as.numeric(soil_area_cm_3),
+    roots_gcm3 = as.numeric(mass_area_g_cm_3)) %>%
+  select(date, plot_id, depth, days_after_planting, roots_g, soilvol_cm3, roots_gcm3)
 
 
 d96 <-
@@ -120,9 +135,11 @@ d96 <-
          days_after_planting =96) %>%
   fill(plot, rotation) %>%
   mutate(plot_id = paste(year, plot, sep = "_")) %>%
-  #rename("root_weights_g" = root_weight_g) %>%
-  select(date, plot_id, depth, days_after_planting, root_weights_g)  %>%
-  mutate(root_weights_g = as.numeric(root_weights_g))
+  mutate(
+    roots_g = as.numeric(root_weights_g),
+    soilvol_cm3 = as.numeric(soil_area_cm_3),
+    roots_gcm3 = as.numeric(mass_area_g_cm_3)) %>%
+  select(date, plot_id, depth, days_after_planting, roots_g, soilvol_cm3, roots_gcm3)
 
 d117 <-
   read_excel("data-raw/rootdist_ml/2020-data-from-matt/Marsden 2020 Root Biomass Data_12Feb2021.xlsx",
@@ -136,9 +153,11 @@ d117 <-
          days_after_planting =117) %>%
   fill(plot, rotation) %>%
   mutate(plot_id = paste(year, plot, sep = "_")) %>%
-  #rename("root_weights_g" = root_weight_g) %>%
-  select(date, plot_id, depth, days_after_planting, root_weights_g)  %>%
-  mutate(root_weights_g = as.numeric(root_weights_g))
+  mutate(
+    roots_g = as.numeric(root_weights_g),
+    soilvol_cm3 = as.numeric(soil_area_cm_3),
+    roots_gcm3 = as.numeric(mass_area_g_cm_3)) %>%
+  select(date, plot_id, depth, days_after_planting, roots_g, soilvol_cm3, roots_gcm3)
 
 rd20 <-
   d4 %>%
@@ -155,8 +174,28 @@ rd20 <-
 mrs_rootdist_ml <-
   rd19 %>%
   bind_rows(rd20) %>%
+  rename("dap" = days_after_planting) %>%
   arrange(year, date, plot_id, depth)
 
 
 mrs_rootdist_ml %>% write_csv("data-raw/rootdist_ml/mrs_rootdist_ml.csv")
 usethis::use_data(mrs_rootdist_ml, overwrite = T)
+
+
+# sum over entire profile -------------------------------------------------
+
+mrs_rootdist_mlsum <-
+  mrs_rootdist_ml %>%
+  group_by(year, date, dap, plot_id) %>%
+  summarise_if(is.numeric, sum, na.rm = T) %>%
+  mutate(roots_gcm3 = roots_g/soilvol_cm3,
+         roots_kgha = roots_gcm3 * (1/1000) * (100^3) * 10000 * 0.6)
+
+mrs_rootdist_mlsum %>%
+  left_join(pk) %>%
+  ggplot(aes(dap, roots_kgha, color = rot_trt)) +
+  geom_point() +
+  facet_grid(year~.)
+
+mrs_rootdist_mlsum %>% write_csv("data-raw/rootdist_ml/mrs_rootdist_mlsum.csv")
+usethis::use_data(mrs_rootdist_mlsum, overwrite = T)

@@ -5,7 +5,7 @@
 #
 # purpose: Process root dist data from 2019 and 2020 ML exp
 #
-# NOTES:
+# NOTES: Shit I need to tak into account the soil volume...
 #
 #########################
 

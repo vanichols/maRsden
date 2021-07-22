@@ -184,8 +184,14 @@ usethis::use_data(mrs_rootdist_ml, overwrite = T)
 
 # sum over entire profile -------------------------------------------------
 
+#--plot 22, day 117 in 2020 has NAs. Eliminate it from the sum data
+mrs_rootdist_ml %>%
+  filter(plot_id == "2020_22") %>%
+  arrange(-dap)
+
 mrs_rootdist_mlsum <-
   mrs_rootdist_ml %>%
+  filter(!(plot_id == "2020_22" & dap == 117)) %>%
   group_by(year, date, dap, plot_id) %>%
   summarise_if(is.numeric, sum, na.rm = T) %>%
   mutate(roots_gcm3 = roots_g/soilvol_cm3,

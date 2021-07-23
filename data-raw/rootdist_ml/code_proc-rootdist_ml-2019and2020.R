@@ -174,6 +174,9 @@ rd20 <-
 mrs_rootdist_ml <-
   rd19 %>%
   bind_rows(rd20) %>%
+  mutate(roots_gcm3 = roots_g/soilvol_cm3,
+         roots_kgha =
+           roots_gcm3 * (1/1000) * (100^3) * 10000 * 0.15) %>% #--each depth is 15 cm
   rename("dap" = days_after_planting) %>%
   arrange(year, date, plot_id, depth)
 

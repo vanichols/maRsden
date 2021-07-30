@@ -22,9 +22,18 @@ library(readxl)
 #   mutate(plot_id = paste(year, plot, sep = "_"))
 
 
-# 2008 through 2011 -------------------------------------------------------
+# 2002 through 2011 -------------------------------------------------------
 
-# need to do
+# need to do. just extract from Matt's raw data
+
+pk02 <-
+  readxl::read_excel("data-raw/yields/raw/raw-from-ML/Corn yield 2002-2020.xlsx") %>%
+  janitor::clean_names() %>%
+  mutate(rot_trt = paste0(rotation, "y"),
+         block = paste0("b", block),
+         harv_crop = paste0("C", rotation),
+         plot_id = paste(year, plot, sep = "_")) %>%
+  select(plot_id, year, block, plot, rot_trt, harv_crop)
 
 
 # 2012-2019 ---------------------------------------------------------------
@@ -49,7 +58,10 @@ pk20 <- read_excel("data-raw/plotkey/rd_year-plot-trt-2020.xlsx") %>%
   mutate(plot_id = paste(year, plot, sep = "_"))
 
 
-plotkey <- bind_rows(pk19, pk20) %>%
+plotkey <-
+  pk02 %>%
+  bind_rows(pk19) %>%
+  bind_rows(pk20) %>%
   arrange(year, block, plot)
 
 

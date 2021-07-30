@@ -30,6 +30,11 @@ pk <- read_csv("data-raw/plotkey/plotkey.csv")
 #--currently plot key only goes back to 2012, so yields are only presesnted for 2012-2017
 dhist <- read_csv("data-raw/yields/raw/rd_cornyld-2012-2017.csv")
 
+#--make 2002-2020 dataset that just won't be comptable with the plot key
+d02 <-
+  readxl::read_excel("data-raw/yields/raw/raw-from-ML/Corn yield 2002-2020.xlsx") %>%
+  janitor::clean_names()
+
 
 d18 <-
   read_csv("data-raw/yields/raw/rd_cornyld-2018.csv", skip = 4) %>%

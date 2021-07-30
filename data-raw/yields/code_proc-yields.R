@@ -30,63 +30,78 @@ pk <- read_csv("data-raw/plotkey/plotkey.csv")
 #--currently plot key only goes back to 2012, so yields are only presesnted for 2012-2017
 dhist <- read_csv("data-raw/yields/raw/rd_cornyld-2012-2017.csv")
 
-#--make 2002-2020 dataset that just won't be comptable with the plot key
+#--make 2002-2020 dataset
 d02 <-
   readxl::read_excel("data-raw/yields/raw/raw-from-ML/Corn yield 2002-2020.xlsx") %>%
-  janitor::clean_names()
+  janitor::clean_names() %>%
+  mutate(plot_id = paste(year, plot, sep = "_")) %>%
+  select(year, plot_id, yield_mg_ha_15_5_percent_moisture) %>%
+  group_by(plot_id) %>%
+  summarise(yield_Mgha = (1-0.155) * mean(yield_mg_ha_15_5_percent_moisture, na.rm = T))  #--bc of the split herbicide plots
 
+d02
 
-d18 <-
-  read_csv("data-raw/yields/raw/rd_cornyld-2018.csv", skip = 4) %>%
-  mutate(trt = gsub("[[:punct:]]+", "", trt)) %>%
-  rename(harv_crop = rot) %>%
-  group_by(plot, harv_crop) %>%
-  summarise(yield_Mgha = (1-0.155) * mean(yield_Mgha155, na.rm = T)) %>%
-  mutate(year = 2018)
-
-
-d19 <-
-  read_csv("data-raw/yields/raw/rd_cornyld-2019.csv", skip = 4) %>%
-  fill(plot, rot) %>%
-  mutate(trt = gsub("[[:punct:]]+", "", trt)) %>%
-  rename(harv_crop = rot) %>%
-  group_by(plot, harv_crop) %>%
-  summarise(yield_Mgha = (1-0.155) * mean(yield_Mgha155, na.rm = T)) %>%
-  mutate(year = 2019)
-
-
-d20 <-
-  read_csv("data-raw/yields/raw/rd_cornyld-2020.csv", skip = 5) %>%
-  mutate(trt = str_to_lower(trt)) %>%
-  rename(harv_crop = rot) %>%
-  group_by(plot, harv_crop) %>%
-  summarise(yield_Mgha = (1-0.155) * mean(yield_Mgha155, na.rm = T)) %>%
-  mutate(year = 2020)
-
-
-
+# pk
+#
+#
+# d18 <-
+#   read_csv("data-raw/yields/raw/rd_cornyld-2018.csv", skip = 4) %>%
+#   mutate(trt = gsub("[[:punct:]]+", "", trt)) %>%
+#   rename(harv_crop = rot) %>%
+#   group_by(plot, harv_crop) %>%
+#   summarise(yield_Mgha = (1-0.155) * mean(yield_Mgha155, na.rm = T)) %>%
+#   mutate(year = 2018)
+#
+#
+# d19 <-
+#   read_csv("data-raw/yields/raw/rd_cornyld-2019.csv", skip = 4) %>%
+#   fill(plot, rot) %>%
+#   mutate(trt = gsub("[[:punct:]]+", "", trt)) %>%
+#   rename(harv_crop = rot) %>%
+#   group_by(plot, harv_crop) %>%
+#   summarise(yield_Mgha = (1-0.155) * mean(yield_Mgha155, na.rm = T)) %>%
+#   mutate(year = 2019)
+#
+#
+# d20 <-
+#   read_csv("data-raw/yields/raw/rd_cornyld-2020.csv", skip = 5) %>%
+#   mutate(trt = str_to_lower(trt)) %>%
+#   rename(harv_crop = rot) %>%
+#   group_by(plot, harv_crop) %>%
+#   summarise(yield_Mgha = (1-0.155) * mean(yield_Mgha155, na.rm = T)) %>%
+#   mutate(year = 2020)
+#
+#
+#
 
 mrs_cornylds <-
-  d18 %>%
-  bind_rows(d19) %>%
-  bind_rows(d20) %>%
+  d02 %>%
   left_join(pk) %>%
-  ungroup() %>%
-  select(plot_id, yield_Mgha) %>%
-  bind_rows(dhist) %>%
   arrange(plot_id)
 
-
-mrs_cornylds %>%  write_csv("data-raw/yields/mrs_cornylds.csv")
-
-usethis::use_data(mrs_cornylds, overwrite = T)
 
 #--quick look
 library(ggplot2)
 mrs_cornylds %>%
   left_join(pk) %>%
-  ggplot(aes(rot_trt, yield_Mgha)) +
-  stat_summary(fun.data = "mean_cl_boot", colour = "red", size = 2) +
-  facet_grid(.~year)
+  ggplot(aes(year, yield_Mgha, color = rot_trt)) +
+  geom_point()
+
+
+mrs_cornylds %>%
+  left_join(pk) %>%
+  group_by(rot_trt, year) %>%
+  summarise(yield_Mgha = mean(yield_Mgha, na.rm = T)) %>%
+  ggplot(aes(year, yield_Mgha, color = rot_trt)) +
+  geom_line()
+
 
 ggsave("data-raw/yields/fig_corn-yields.png")
+
+
+# commit to it! -----------------------------------------------------------
+
+
+mrs_cornylds %>%  write_csv("data-raw/yields/mrs_cornylds.csv")
+
+usethis::use_data(mrs_cornylds, overwrite = T)

@@ -18,6 +18,17 @@ library(readxl)
 
 wea <- read_excel("data-raw/weather/raw_wea_ames-facts-1980-2019.xlsx")
 
+#--not qc'd, mesonet data for 2020
+wea20 <-
+  read_excel("data-raw/weather/nwscoop_ames-2020.xlsx") %>%
+  mutate(year = year(day),
+         date = ymd(day)) %>%
+  select(year, date, doy, highc, lowc, precipmm, narr_srad) %>%
+  rename("day" = doy,
+         "maxt_c" = highc,
+         "mint_c" = lowc,
+         "rain_mm" = precipmm,
+         "radn_MJm2" = narr_srad)
 
 # wrangle -----------------------------------------------------------------
 
@@ -31,6 +42,7 @@ mrs_wea <-
   wea %>%
 #  filter(year > 2017) %>%
   left_join(doy_tib) %>%
+  bind_rows(wea20) %>%
   select(date, year, day, everything())
 
 

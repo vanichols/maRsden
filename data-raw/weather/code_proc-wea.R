@@ -5,6 +5,8 @@
 #
 # last updated: feb 18 2020 (added dates)
 #                oct 13 2020 (replaced it with qc'd facts weather)
+#               aug 7 2021 (need 2020 data, adding more years to pkg data)
+#
 ##############################
 
 rm(list=ls())
@@ -20,14 +22,14 @@ wea <- read_excel("data-raw/weather/raw_wea_ames-facts-1980-2019.xlsx")
 # wrangle -----------------------------------------------------------------
 
 doy_tib <- tibble::tibble(
-  date = seq(lubridate::ymd("2018-01-01"), lubridate::ymd("2020-12-31"), by = "1 day")) %>%
+  date = seq(lubridate::ymd("1980-01-01"), lubridate::ymd("2020-12-31"), by = "1 day")) %>%
   dplyr::mutate(day = lubridate::yday(date),
                 year = lubridate::year(date))
 
 #--get date
 mrs_wea <-
   wea %>%
-  filter(year > 2017) %>%
+#  filter(year > 2017) %>%
   left_join(doy_tib) %>%
   select(date, year, day, everything())
 

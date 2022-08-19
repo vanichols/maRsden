@@ -12,9 +12,9 @@ library(tidyverse)
 library(lubridate)
 library(readxl) # used to read Excel files
 
-pk <- read_csv("data-raw/_tidy/plotkey.csv")
+pk <- read_csv("data-raw/plotkey/plotkey.csv")
 
-agraw <- read_excel("data-raw/_raw/vn/2018/rd_mars-soil_nutrients.xlsx", skip = 5, na = "NA")
+agraw <- read_excel("data-raw/soil_tests/rd_mars-soil_nutrients.xlsx", skip = 5, na = "NA")
 
 
 
@@ -40,5 +40,5 @@ mrs_nutrients18 <-
 
 # save it -----------------------------------------------------------------
 
-mrs_nutrients18 %>% write_csv("data-raw/_tidy/nutrients18_vn.csv")
+mrs_nutrients18 %>% write_csv("data-raw/soil_tests/mrs_nutrients18.csv")
 usethis::use_data(mrs_nutrients18, overwrite = T)
